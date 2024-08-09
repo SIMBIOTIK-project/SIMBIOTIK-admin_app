@@ -58,6 +58,23 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+
+    flavorDimensions "SIMBIOTIK Pro"
+
+    productFlavors {
+        dev {
+            dimension "SIMBIOTIK Pro"
+            applicationIdSuffix ".dev"
+            resValue "string", "app_name", "SIMBIOTIK Pro DEV"
+            versionNameSuffix ".dev"
+        }
+        prod {
+            dimension "SIMBIOTIK Pro"
+            // applicationIdSuffix ".prod"
+            resValue "string", "app_name", "SIMBIOTIK Pro"
+            versionNameSuffix ".prod"
+        }
+    }
 }
 
 flutter {
