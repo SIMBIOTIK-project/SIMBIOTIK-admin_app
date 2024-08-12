@@ -262,48 +262,6 @@ class _LoginScreenContentState extends State<LoginScreenContent> {
                     );
                   },
                 ),
-                const Gap(8.0),
-                const Row(
-                  children: [
-                    Expanded(child: Divider()),
-                    Gap(8.0),
-                    Text(
-                      'Belum ada akun?',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Gap(8.0),
-                    Expanded(child: Divider()),
-                  ],
-                ),
-                const Gap(8.0),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.biruSimbiotik,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5.0),
-                        )),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'Fitur pendaftaran belum tersedia. Pendaftaran akun masih dilakukan oleh admin!'),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'Daftar',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                )
               ],
             ),
           ),
