@@ -12,5 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'auth_response.dart';
-export 'logout_response.dart';
+import 'package:flutter/material.dart';
+
+class CustomerScreen extends StatefulWidget {
+  const CustomerScreen({super.key});
+
+  @override
+  State<CustomerScreen> createState() => _CustomerScreenState();
+}
+
+class _CustomerScreenState extends State<CustomerScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}

@@ -38,3 +38,7 @@ String formatCurrency(double amount) {
     return formatCurrency.format(amount);
   }
 }
+
+double parseOrZero(String? value) {
+  return double.tryParse(value ?? '') ?? 0.0;
+}

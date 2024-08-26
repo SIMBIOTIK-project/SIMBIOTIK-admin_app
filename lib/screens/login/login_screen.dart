@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simbiotik_admin/core/blocs/blocs.dart';
 import 'package:simbiotik_admin/core/routers/routers.dart';
 import 'package:simbiotik_admin/data/data.dart';
@@ -45,6 +46,17 @@ class _LoginScreenContentState extends State<LoginScreenContent> {
 
   bool? _rememberMe = false;
   bool _obsecurePassword = true;
+
+  _savedToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
+  }
+
+  Future<void> _loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
+    print('Hasil penyimpanan token $token');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -207,9 +219,20 @@ class _LoginScreenContentState extends State<LoginScreenContent> {
                   listener: (context, state) {
                     if (state.status.isLoaded) {
                       if (state.data?.status == StatusUser.admin.value) {
-                        GoRouter.of(context).pushReplacement(
-                          AppRouterConstants.homeScreen,
-                        );
+                        // GoRouter.of(context).pushReplacement(
+                        //   AppRouterConstants.homeScreen,
+                        // );
+                        if (_rememberMe == true) {
+                          if (state.token != null) {
+                            _savedToken(state.token!);
+                            _loadToken();
+                          }
+                        } else {
+                          GoRouter.of(context).pushReplacement(
+                            AppRouterConstants.homeScreen,
+                            extra: state.token,
+                          );
+                        }
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(

@@ -12,5 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'auth_response.dart';
-export 'logout_response.dart';
+import 'package:flutter/material.dart';
+
+class HistoriesScreen extends StatefulWidget {
+  const HistoriesScreen({super.key});
+
+  @override
+  State<HistoriesScreen> createState() => _HistoriesScreenState();
+}
+
+class _HistoriesScreenState extends State<HistoriesScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}

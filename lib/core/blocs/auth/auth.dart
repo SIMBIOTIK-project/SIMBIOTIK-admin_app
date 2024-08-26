@@ -13,3 +13,4 @@
 // limitations under the License.
 
 export 'auth_bloc.dart';
+export 'logout_bloc.dart';

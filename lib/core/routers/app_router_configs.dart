@@ -33,7 +33,8 @@ class AppRouterConfig {
               name: AppRouterConstants.homeScreen,
               path: AppRouterConstants.homeScreen,
               builder: (context, state) {
-                return const Homescreen();
+                String? token = state.extra as String?;
+                return Homescreen();
               },
             )
           ],

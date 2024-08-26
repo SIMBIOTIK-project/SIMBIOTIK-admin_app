@@ -13,4 +13,4 @@
 // limitations under the License.
 
 export 'api_constants.dart';
-export 'repository/auth_repository.dart';
+export 'repository/repository.dart';

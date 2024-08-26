@@ -12,5 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'auth_response.dart';
-export 'logout_response.dart';
+part of 'logout_bloc.dart';
+
+@freezed
+class LogoutEvent with _$LogoutEvent {
+  const factory LogoutEvent.logout() = _Logout;
+}

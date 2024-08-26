@@ -46,6 +46,9 @@ dependencies:
   json_annotation: ^4.9.0
   foundation: ^0.0.5
   pretty_dio_logger: ^1.4.0
+  shared_preferences: ^2.2.3
+  flutter_sticky_header: ^0.6.5
+  flutter_switch: ^0.3.2
 
 dev_dependencies:
   flutter_test:
@@ -78,6 +81,7 @@ flutter:
     - .env
     - .env_dev
     - assets/images/
+    - assets/icons/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
