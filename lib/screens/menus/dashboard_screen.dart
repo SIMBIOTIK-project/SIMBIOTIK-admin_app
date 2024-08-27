@@ -14,9 +14,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:gap/gap.dart';
+import 'package:simbiotik_admin/core/blocs/waste_type/waste_type_bloc.dart';
 import 'package:simbiotik_admin/gen/assets.gen.dart';
 import 'package:simbiotik_admin/models/waste_types/waste_types.dart';
 import 'package:simbiotik_admin/utils/utils.dart';
@@ -33,18 +34,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final TextEditingController _idNasabah = TextEditingController();
 
   List<WasteTypesModel> items = [
-    WasteTypesModel(
-        id: 2,
-        type: 'botol',
-        price: '1000',
-        createdAt: DateTime.parse('2024-08-13T11:33:38.000000Z'),
-        updatedAt: DateTime.parse('2024-08-13T11:33:38.000000Z')),
-    WasteTypesModel(
-        id: 1,
-        type: 'plastik',
-        price: '2000',
-        createdAt: DateTime.parse('2024-08-13T10:35:26.000000Z'),
-        updatedAt: DateTime.parse('2024-08-13T12:48:55.000000Z')),
+    // WasteTypesModel(
+    //     id: 2,
+    //     type: 'botol',
+    //     price: '1000',
+    //     createdAt: DateTime.parse('2024-08-13T11:33:38.000000Z'),
+    //     updatedAt: DateTime.parse('2024-08-13T11:33:38.000000Z')),
+    // WasteTypesModel(
+    //     id: 1,
+    //     type: 'plastik',
+    //     price: '2000',
+    //     createdAt: DateTime.parse('2024-08-13T10:35:26.000000Z'),
+    //     updatedAt: DateTime.parse('2024-08-13T12:48:55.000000Z')),
   ];
 
   WasteTypesModel? selectedItem;
@@ -214,43 +215,59 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             const Gap(8.0),
-            Container(
-              height: 40,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.black12,
-                ),
-                borderRadius: BorderRadius.circular(
-                  8.0,
-                ),
-              ),
-              child: DropdownButton<WasteTypesModel>(
-                borderRadius: BorderRadius.circular(
-                  8.0,
-                ),
-                underline: const SizedBox.shrink(),
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                isExpanded: true,
-                hint: const Text(
-                  'Pilih jenis sampah',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-                value: selectedItem,
-                items: items.map<DropdownMenuItem<WasteTypesModel>>((e) {
-                  return DropdownMenuItem(
-                    value: e,
-                    child: Text(e.type!),
+            BlocBuilder<WasteTypeBloc, WasteTypeState>(
+              builder: (context, state) {
+                if (state.status.isLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
                   );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedItem = value;
-                    selectedPrice = value?.price;
-                  });
-                },
-              ),
+                } else {
+                  if (state.error != null && state.allData == null) {
+                    return const Text('Data tidak ditemukan');
+                  } else {
+                    items = state.allData ?? [];
+                    return Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.black12,
+                        ),
+                        borderRadius: BorderRadius.circular(
+                          8.0,
+                        ),
+                      ),
+                      child: DropdownButton<WasteTypesModel>(
+                        borderRadius: BorderRadius.circular(
+                          8.0,
+                        ),
+                        underline: const SizedBox.shrink(),
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        isExpanded: true,
+                        hint: const Text(
+                          'Pilih jenis sampah',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                        value: selectedItem,
+                        items:
+                            items.map<DropdownMenuItem<WasteTypesModel>>((e) {
+                          return DropdownMenuItem(
+                            value: e,
+                            child: Text(e.type!),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedItem = value;
+                            selectedPrice = value?.price;
+                          });
+                        },
+                      ),
+                    );
+                  }
+                }
+              },
             ),
             const Gap(16.0),
             Row(

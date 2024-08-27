@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logger/web.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simbiotik_admin/core/blocs/blocs.dart';
 import 'package:simbiotik_admin/core/routers/routers.dart';
@@ -55,7 +56,7 @@ class _LoginScreenContentState extends State<LoginScreenContent> {
   Future<void> _loadToken() async {
     final prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') ?? '';
-    print('Hasil penyimpanan token $token');
+    Logger().d(token);
   }
 
   @override

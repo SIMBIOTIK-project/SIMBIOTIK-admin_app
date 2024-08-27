@@ -33,8 +33,10 @@ class AppRouterConfig {
               name: AppRouterConstants.homeScreen,
               path: AppRouterConstants.homeScreen,
               builder: (context, state) {
-                String? token = state.extra as String?;
-                return Homescreen();
+                String token = state.extra as String;
+                return Homescreen(
+                  token: token,
+                );
               },
             )
           ],

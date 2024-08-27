@@ -13,21 +13,32 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:simbiotik_admin/core/blocs/waste_type/waste_type_bloc.dart';
+import 'package:simbiotik_admin/data/repository/waste_type_repository.dart';
 import 'package:simbiotik_admin/screens/menus/manus.dart';
 import 'package:simbiotik_admin/utils/utils.dart';
 
 class Homescreen extends StatelessWidget {
-  final String? token;
+  final String token;
   const Homescreen({
-    this.token,
+    required this.token,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return HomeScreenContent(
-      token: token,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => WasteTypeBloc(WasteTypeRepository())
+            ..add(WasteTypeEvent.fetchAll(token: token)),
+        )
+      ],
+      child: HomeScreenContent(
+        token: token,
+      ),
     );
   }
 }

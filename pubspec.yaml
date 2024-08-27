@@ -49,6 +49,7 @@ dependencies:
   shared_preferences: ^2.2.3
   flutter_sticky_header: ^0.6.5
   flutter_switch: ^0.3.2
+  logger: ^2.4.0
 
 dev_dependencies:
   flutter_test:

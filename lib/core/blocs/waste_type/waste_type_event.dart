@@ -12,6 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'waste_types_model.dart';
-export 'waste_type_page_model.dart';
-export 'waste_type_response_model.dart';
+part of 'waste_type_bloc.dart';
+
+@freezed
+class WasteTypeEvent with _$WasteTypeEvent {
+  const factory WasteTypeEvent.fetch({
+    required String token,
+    int? page,
+  }) = _Fetch;
+
+  const factory WasteTypeEvent.fetchAll({
+    required String token,
+  }) = _FetchAll;
+}
