@@ -15,3 +15,5 @@
 export 'users/users.dart';
 export 'auth/auth.dart';
 export 'waste_types/waste_types.dart';
+export 'deposits/deposits.dart';
+export 'withdrawals/withdrawals.dart';

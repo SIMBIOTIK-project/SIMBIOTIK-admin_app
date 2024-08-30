@@ -42,3 +42,10 @@ String formatCurrency(double amount) {
 double parseOrZero(String? value) {
   return double.tryParse(value ?? '') ?? 0.0;
 }
+
+String formattedDate(String time) {
+  final date = DateFormat('dd-MM-yyyy').format(
+    DateTime.parse(time),
+  );
+  return date;
+}

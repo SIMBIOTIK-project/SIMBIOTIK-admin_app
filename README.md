@@ -31,4 +31,24 @@ For Production
 flutter run --flavor prod --target lib/main_prod.dart
 ```
 
+Build Apk
+```
+flutter build apk --flavor=prod --target=lib/main_prod.dart --dart-define-from-file=.env
+```
 
+
+If Error: 
+- Execution failed for task ':app:checkProdReleaseDuplicateClasses'.
+
+Solution: Add in adndroid/app/build.gradle file
+```
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            if ((requested.group == "org.jetbrains.kotlin") && (requested.name.startsWith("kotlin-stdlib"))) {
+                useVersion("1.8.0")
+            }
+        }
+    }
+}
+```

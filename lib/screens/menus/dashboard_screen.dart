@@ -17,93 +17,249 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:gap/gap.dart';
+import 'package:simbiotik_admin/core/blocs/deposit/deposit.dart';
 import 'package:simbiotik_admin/core/blocs/waste_type/waste_type_bloc.dart';
+import 'package:simbiotik_admin/core/blocs/withdrawal/withdrawal.dart';
+import 'package:simbiotik_admin/core/blocs/withdrawal/withdrawal_bloc.dart';
 import 'package:simbiotik_admin/gen/assets.gen.dart';
-import 'package:simbiotik_admin/models/waste_types/waste_types.dart';
+import 'package:simbiotik_admin/models/models.dart';
 import 'package:simbiotik_admin/utils/utils.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final String token;
+  const DashboardScreen({
+    required this.token,
+    super.key,
+  });
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with SingleTickerProviderStateMixin {
   bool isSwitchedMode = false;
-  final TextEditingController _idNasabah = TextEditingController();
+  late TextEditingController _idNasabah;
+  late TextEditingController _idNasabahWithdrawal;
+  late TextEditingController _weight;
+  late TextEditingController _price;
+  late TextEditingController _note;
 
-  List<WasteTypesModel> items = [
-    // WasteTypesModel(
-    //     id: 2,
-    //     type: 'botol',
-    //     price: '1000',
-    //     createdAt: DateTime.parse('2024-08-13T11:33:38.000000Z'),
-    //     updatedAt: DateTime.parse('2024-08-13T11:33:38.000000Z')),
-    // WasteTypesModel(
-    //     id: 1,
-    //     type: 'plastik',
-    //     price: '2000',
-    //     createdAt: DateTime.parse('2024-08-13T10:35:26.000000Z'),
-    //     updatedAt: DateTime.parse('2024-08-13T12:48:55.000000Z')),
-  ];
+  List<WasteTypesModel> items = [];
 
   WasteTypesModel? selectedItem;
   String? selectedPrice;
-  String? weight;
+
+  late TabController _tabController;
+
+  int _selectedTabBarIndex = 0;
+  final _selectedColor = Colors.teal;
+  final _tabs = [
+    const Tab(
+      text: 'Setoran',
+    ),
+    const Tab(
+      text: 'Penarikan',
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _idNasabah = TextEditingController();
+    _idNasabahWithdrawal = TextEditingController();
+    _weight = TextEditingController();
+    _price = TextEditingController();
+    _note = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _tabController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(
-          16,
+        body: MultiBlocListener(
+      listeners: [
+        BlocListener<DepositBloc, DepositState>(
+          listener: (context, state) {
+            if (state.status.isLoading) {
+              showDialog(
+                context: context,
+                builder: (_) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            } else if (state.status.isLoaded) {
+              Navigator.pop(context);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Data berhasil ditambahkan')),
+              );
+              setState(() {
+                _idNasabah.text = '';
+                selectedItem = null;
+                _weight.text = '';
+              });
+            } else if (state.status.isError) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error: ${state.error}')),
+              );
+            }
+          },
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    isSwitchedMode == false ? 'Manual' : 'Bluetooth',
-                    style: const TextStyle(
+        BlocListener<WithdrawalBloc, WithdrawalState>(
+          listener: (context, state) {
+            if (state.status.isLoading) {
+              showDialog(
+                context: context,
+                builder: (_) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            } else if (state.status.isLoaded) {
+              Navigator.pop(context);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Penarikan berhasil')),
+              );
+              setState(() {
+                _idNasabahWithdrawal.text = '';
+                _price.text = '';
+                _note.text = '';
+              });
+            } else if (state.status.isError) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error: ${state.error}')),
+              );
+            }
+          },
+        )
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(
+          20,
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Beranda',
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
+                    )),
+                Row(
+                  children: [
+                    Text(
+                      isSwitchedMode == false ? 'Manual' : 'Bluetooth',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                  const Gap(8.0),
-                  FlutterSwitch(
-                    width: 50,
-                    height: 25,
-                    value: isSwitchedMode,
-                    onToggle: (value) {
-                      setState(() {
-                        isSwitchedMode = value;
-                      });
-                    },
-                  )
-                ],
-              ),
-              const Text(
-                'Mulai Timbang',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                    const Gap(8.0),
+                    FlutterSwitch(
+                      width: 50,
+                      height: 25,
+                      value: isSwitchedMode,
+                      onToggle: (value) {
+                        setState(() {
+                          isSwitchedMode = value;
+                          if (isSwitchedMode == true) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('Fitur masih dalam pengembangan!'),
+                              ),
+                            );
+                          }
+                        });
+                      },
+                    )
+                  ],
+                )
+              ],
+            ),
+            const Gap(20.0),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: kToolbarHeight - 20.0,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: TabBar(
+                        controller: _tabController,
+                        onTap: (index) {
+                          setState(() {
+                            _selectedTabBarIndex = index;
+                          });
+                        },
+                        tabs: _tabs,
+                        indicator: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8.0),
+                            color: _selectedColor),
+                        labelColor: Colors.white,
+                        indicatorPadding: EdgeInsets.zero,
+                        dividerColor: Colors.transparent,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                      ),
+                    ),
+                    const Gap(8.0),
+                    _selectedTabBarIndex == 0
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Mulai Timbang',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Gap(8.0),
+                              _buildScales(context),
+                              const Gap(8.0),
+                              const Divider(),
+                              const Gap(8.0),
+                            ],
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Masukkan Penarikan',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Gap(8.0),
+                              _buildWithdrawal(context),
+                              const Gap(8.0),
+                              const Divider(),
+                              const Gap(8.0),
+                            ],
+                          ),
+                    _buildDraft(context),
+                  ],
                 ),
               ),
-              const Gap(8.0),
-              _buildScales(context),
-              const Gap(8.0),
-              const Divider(),
-              const Gap(8.0),
-              _buildDraft(context),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-    );
+    ));
   }
 
   _buildScales(BuildContext context) {
@@ -182,6 +338,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 4,
               ),
               child: TextField(
+                controller: _weight,
                 keyboardType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.allow(
@@ -200,9 +357,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 onChanged: (value) {
                   setState(() {
-                    setState(() {
-                      weight = value.replaceAll(',', '.');
-                    });
+                    _weight.text = value.replaceAll(',', '.');
                   });
                 },
               ),
@@ -281,9 +436,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
                 Text(
-                  (selectedPrice != null && weight != null)
-                      ? formatCurrency(
-                          parseOrZero(weight) * parseOrZero(selectedPrice))
+                  (selectedPrice != null && _weight.text.isNotEmpty)
+                      ? formatCurrency(parseOrZero(_weight.text) *
+                          parseOrZero(selectedPrice))
                       : formatCurrency(0),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
@@ -302,13 +457,259 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       borderRadius: BorderRadius.circular(5.0),
                     )),
                 onPressed: (_idNasabah.text.isNotEmpty &&
-                        weight != null &&
-                        selectedItem != null &&
-                        weight != '')
-                    ? () {}
+                        _weight.text != '' &&
+                        selectedItem != null)
+                    ? () {
+                        int total =
+                            int.parse(_weight.text) * int.parse(selectedPrice!);
+
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext dialogContext) {
+                            return AlertDialog(
+                              title: const Text('Setor'),
+                              content: Text(
+                                  'Apakah anda yakin akan melakukan setoran untuk nasabah ${_idNasabah.text}?'),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    context.read<DepositBloc>().add(
+                                          DepositEvent.postDeposit(
+                                            request: DepositRequestModel(
+                                              idUser:
+                                                  _idNasabah.text.toUpperCase(),
+                                              idWasteType:
+                                                  selectedItem!.id!.toString(),
+                                              weight: _weight.text,
+                                              price: total.toString(),
+                                            ),
+                                            token: widget.token,
+                                          ),
+                                        );
+                                  },
+                                  child: const Text('Ya, Setor'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(dialogContext).pop();
+                                  },
+                                  child: const Text('Tidak'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
                     : null,
                 child: const Text(
-                  'Simpan',
+                  'Setor',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  _buildWithdrawal(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.black12,
+        ),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'ID Nasabah',
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Gap(8.0),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.black12,
+                ),
+                borderRadius: BorderRadius.circular(
+                  8.0,
+                ),
+              ),
+              height: 40,
+              padding: const EdgeInsets.fromLTRB(
+                8,
+                4,
+                8,
+                4,
+              ),
+              child: TextField(
+                controller: _idNasabahWithdrawal,
+                decoration: const InputDecoration(
+                  hintText: 'Masukkan ID nasabah',
+                  hintStyle: TextStyle(
+                    fontWeight: FontWeight.w300,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 8.0,
+                  ),
+                ),
+              ),
+            ),
+            const Gap(8.0),
+            const Text(
+              'Jumlah Penarikan (Rp)',
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Gap(8.0),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.black12,
+                ),
+                borderRadius: BorderRadius.circular(
+                  8.0,
+                ),
+              ),
+              height: 40,
+              padding: const EdgeInsets.fromLTRB(
+                8,
+                4,
+                8,
+                4,
+              ),
+              child: TextField(
+                controller: _price,
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.allow(
+                      RegExp(r'^[0-9]*[.,]?[0-9]*$')),
+                ],
+                decoration: const InputDecoration(
+                  hintText: 'Masukkan jumlah penarikan (100000)',
+                  hintStyle: TextStyle(
+                    fontWeight: FontWeight.w300,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 8.0,
+                  ),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _price.text = value.replaceAll(RegExp(r'[.,]'), '');
+                  });
+                },
+              ),
+            ),
+            const Gap(8.0),
+            const Text(
+              'Keterangan',
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Gap(8.0),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.black12,
+                ),
+                borderRadius: BorderRadius.circular(
+                  8.0,
+                ),
+              ),
+              height: 40,
+              padding: const EdgeInsets.fromLTRB(
+                8,
+                4,
+                8,
+                4,
+              ),
+              child: TextField(
+                controller: _note,
+                decoration: const InputDecoration(
+                  hintText: 'Masukkan keterangan',
+                  hintStyle: TextStyle(
+                    fontWeight: FontWeight.w300,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 8.0,
+                  ),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _note.text = value;
+                  });
+                },
+              ),
+            ),
+            const Gap(20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.hijauSimbiotik,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    )),
+                onPressed: (_idNasabahWithdrawal.text.isNotEmpty &&
+                        _price.text.isNotEmpty &&
+                        _note.text.isNotEmpty)
+                    ? () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext dialogContext) {
+                            return AlertDialog(
+                              title: const Text('Tarik Dana'),
+                              content: Text(
+                                  'Apakah anda yakin akan melakukan penarikan untuk nasabah ${_idNasabahWithdrawal.text}?'),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    context.read<WithdrawalBloc>().add(
+                                          WithdrawalEvent.postWithdrawal(
+                                            request: WithdrawalsRequestModel(
+                                              idUser: _idNasabahWithdrawal.text
+                                                  .toUpperCase(),
+                                              price: _price.text,
+                                              status: _note.text,
+                                            ),
+                                            token: widget.token,
+                                          ),
+                                        );
+                                  },
+                                  child: const Text('Ya, Tarik Dana'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(dialogContext).pop();
+                                  },
+                                  child: const Text('Tidak'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    : null,
+                child: const Text(
+                  'Tarik Dana',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16.0,

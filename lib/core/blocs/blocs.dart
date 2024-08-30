@@ -13,3 +13,7 @@
 // limitations under the License.
 
 export 'auth/auth.dart';
+export 'waste_type/waste_type.dart';
+export 'deposit/deposit.dart';
+export 'withdrawal/withdrawal.dart';
+export 'user/user.dart';

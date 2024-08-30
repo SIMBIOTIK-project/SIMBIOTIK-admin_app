@@ -50,6 +50,7 @@ dependencies:
   flutter_sticky_header: ^0.6.5
   flutter_switch: ^0.3.2
   logger: ^2.4.0
+  firebase_core: ^3.4.0
 
 dev_dependencies:
   flutter_test:

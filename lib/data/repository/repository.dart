@@ -1,4 +1,4 @@
-// Copyright 2024 ariefsetyonugroho
+// Copyright 2024 SIMBIOTIK Developer
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,3 +14,7 @@
 
 export 'auth_repository.dart';
 export 'logout_repository.dart';
+export 'waste_type_repository.dart';
+export 'deposit_repository.dart';
+export 'withdrawal_repository.dart';
+export 'user_repository.dart';

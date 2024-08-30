@@ -18,3 +18,9 @@
 - Setting configuration flavor android and iOS
 - Setting environment
 - Login screen
+- Input Deposit
+- Input Withdrawal
+- List Customer
+- List Depoist
+- List Withdrawal
+- Logout

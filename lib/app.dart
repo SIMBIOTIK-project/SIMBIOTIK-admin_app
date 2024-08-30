@@ -24,8 +24,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: config.appName,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+          primarySwatch: Colors.blue,
+          appBarTheme: const AppBarTheme(
+            surfaceTintColor: Colors.white,
+          )),
       routerDelegate: _appRouter.router.routerDelegate,
       routeInformationParser: _appRouter.router.routeInformationParser,
       routeInformationProvider: _appRouter.router.routeInformationProvider,

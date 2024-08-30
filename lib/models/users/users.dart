@@ -14,3 +14,5 @@
 
 export 'user_model.dart';
 export 'enum/enum.dart';
+export 'user_page_model.dart';
+export 'user_response_model.dart';

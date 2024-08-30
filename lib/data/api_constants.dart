@@ -18,4 +18,7 @@ class ApiConstants {
   static const String register = '/register';
   static const String user = '/user';
   static const String wasteType = '/wastetypes';
+  static const String deposit = '/deposits';
+  static const String withdrawal = '/withdrawals';
+  static const String allUser = '/users';
 }
