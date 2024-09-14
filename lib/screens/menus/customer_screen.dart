@@ -49,142 +49,179 @@ class _CustomerScreenState extends State<CustomerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: BlocConsumer<UserBloc, UserState>(
-      listener: (context, state) {
-        if (state.status.isError) {
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Data tidak ditemukan!'),
-                const Gap(8.0),
+                const Text(
+                  'Daftar Nasabah',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
                 InkWell(
-                  onTap: () {
-                    _handleRefreshData(
-                      '',
+                  onTap: () async {
+                    bool? result = await GoRouter.of(context).pushNamed(
+                      AppRouterConstants.registerScreen,
+                      extra: widget.token,
                     );
+
+                    if (result == true) {
+                      _handleRefreshData('');
+                    }
                   },
-                  child: const Text(
-                    'Ulangi',
-                    style: TextStyle(
-                      color: Colors.blue,
-                    ),
+                  child: const Row(
+                    children: [
+                      Text('Tambah'),
+                      Icon(
+                        Icons.add,
+                        size: 20,
+                      ),
+                    ],
                   ),
                 )
               ],
             ),
-          );
-        }
-      },
-      builder: (context, state) {
-        if (state.status.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        } else if (state.status.isLoaded && state.allData != null) {
-          allUser = state.allData!;
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const Gap(8.0),
+            Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Daftar Nasabah',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.black12,
+                      ),
+                      borderRadius: BorderRadius.circular(
+                        8.0,
                       ),
                     ),
-                    InkWell(
-                      onTap: () async {
-                        bool? result = await GoRouter.of(context).pushNamed(
-                          AppRouterConstants.registerScreen,
-                          extra: widget.token,
-                        );
-
-                        if (result == true) {
-                          _handleRefreshData('');
+                    height: 40,
+                    padding: const EdgeInsets.fromLTRB(
+                      8,
+                      4,
+                      8,
+                      4,
+                    ),
+                    child: TextField(
+                      controller: _keyword,
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.search),
+                        hintText: 'Cari Nasabah',
+                        hintStyle: TextStyle(
+                          fontWeight: FontWeight.w300,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 8.0,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        if (value.isEmpty) {
+                          setState(() {
+                            _handleRefreshData('');
+                          });
                         }
                       },
-                      child: const Row(
-                        children: [
-                          Text('Tambah'),
-                          Icon(
-                            Icons.add,
-                            size: 20,
+                    ),
+                  ),
+                ),
+                const Gap(4.0),
+                InkWell(
+                  onTap: () {
+                    _handleRefreshData(_keyword.text);
+                  },
+                  child: Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.teal,
+                      border: Border.all(
+                        color: Colors.black12,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Center(
+                        child: Text(
+                          'Cari',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
                           ),
-                        ],
+                        ),
                       ),
-                    )
-                  ],
-                ),
-                const Gap(8.0),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.black12,
-                    ),
-                    borderRadius: BorderRadius.circular(
-                      8.0,
-                    ),
-                  ),
-                  height: 40,
-                  padding: const EdgeInsets.fromLTRB(
-                    8,
-                    4,
-                    8,
-                    4,
-                  ),
-                  child: TextField(
-                    controller: _keyword,
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.search),
-                      hintText: 'Cari Nasabah',
-                      hintStyle: TextStyle(
-                        fontWeight: FontWeight.w300,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 8.0,
-                      ),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _handleRefreshData(value);
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: ListView.separated(
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return _buildListCustomer(context, allUser[index]);
-                      },
-                      separatorBuilder: (context, index) {
-                        return const Gap(16.0);
-                      },
-                      itemCount: allUser.length,
                     ),
                   ),
                 ),
               ],
             ),
-          );
-        }
-        return Container();
-      },
-    ));
+            const SizedBox(
+              height: 16,
+            ),
+            Expanded(
+              child: BlocConsumer<UserBloc, UserState>(
+                listener: (context, state) {
+                  if (state.status.isError) {
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text('Data tidak ditemukan!'),
+                          const Gap(8.0),
+                          InkWell(
+                            onTap: () {
+                              _handleRefreshData(
+                                '',
+                              );
+                            },
+                            child: const Text(
+                              'Ulangi',
+                              style: TextStyle(
+                                color: Colors.blue,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                  }
+                },
+                builder: (context, state) {
+                  if (state.status.isLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (state.status.isLoaded && state.allData != null) {
+                    allUser = state.allData!;
+                    return SingleChildScrollView(
+                      child: ListView.separated(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return _buildListCustomer(context, allUser[index]);
+                        },
+                        separatorBuilder: (context, index) {
+                          return const Gap(16.0);
+                        },
+                        itemCount: allUser.length,
+                      ),
+                    );
+                  }
+                  return Container();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   _buildListCustomer(BuildContext context, UserModel user) {
