@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simbiotik_admin/core/blocs/deposit/deposit.dart';
 import 'package:simbiotik_admin/core/blocs/user/user_bloc.dart';
@@ -72,9 +73,16 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
   int _currentIndex = 0;
   late List<Widget> _children;
 
+  Future<void> _loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
+    Logger().d(token);
+  }
+
   @override
   void initState() {
     super.initState();
+    _loadToken();
     _children = [
       DashboardScreen(token: widget.token),
       CustomerScreen(token: widget.token),

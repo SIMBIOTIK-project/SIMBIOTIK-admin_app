@@ -12,11 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:gap/gap.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:logger/web.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simbiotik_admin/core/blocs/deposit/deposit.dart';
 import 'package:simbiotik_admin/core/blocs/waste_type/waste_type_bloc.dart';
 import 'package:simbiotik_admin/core/blocs/withdrawal/withdrawal.dart';
@@ -46,6 +53,8 @@ class _DashboardScreenState extends State<DashboardScreen>
   late TextEditingController _note;
 
   List<WasteTypesModel> items = [];
+  List<DepositRequestModel> _depositList = [];
+  List<WithdrawalsRequestModel> _withdrawalList = [];
 
   WasteTypesModel? selectedItem;
   String? selectedPrice;
@@ -63,6 +72,16 @@ class _DashboardScreenState extends State<DashboardScreen>
     ),
   ];
 
+  int? selectedIndexDeposit;
+  int? selectedIndexWithdrawal;
+
+  // Bluetooth setup
+  BluetoothDevice? _selectedDevice;
+  BluetoothConnection? _connection;
+  bool isConnected = false;
+  late String receivedData;
+  List<BluetoothDevice> _devices = [];
+
   @override
   void initState() {
     super.initState();
@@ -72,12 +91,83 @@ class _DashboardScreenState extends State<DashboardScreen>
     _weight = TextEditingController();
     _price = TextEditingController();
     _note = TextEditingController();
+    _checkPermissions();
+    _loadListDeposit();
+    _loadListWithdrawal();
+  }
+
+  /// Check permission bluetooh and location
+  Future<void> _checkPermissions() async {
+    if (await Permission.bluetooth.isDenied ||
+        await Permission.bluetoothScan.isDenied ||
+        await Permission.bluetoothConnect.isDenied ||
+        await Permission.location.isDenied) {
+      await [
+        Permission.bluetooth,
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+        Permission.location,
+      ].request();
+    }
+
+    if (await Permission.bluetoothConnect.isGranted) {
+      _discoverDevices();
+    }
+  }
+
+  /// Check discover devices
+  Future<void> _discoverDevices() async {
+    List<BluetoothDevice> devices =
+        await FlutterBluetoothSerial.instance.getBondedDevices();
+
+    setState(() {
+      _devices = devices;
+    });
+  }
+
+  /// Connect to bluetooth device
+  Future<void> _connectToDevice(BluetoothDevice device) async {
+    try {
+      BluetoothConnection connection =
+          await BluetoothConnection.toAddress(device.address);
+      setState(() {
+        _connection = connection;
+        isConnected = true;
+        _selectedDevice = device;
+      });
+
+      _connection!.input!.listen((data) {
+        setState(() {
+          receivedData = String.fromCharCodes(data).trim();
+          if (receivedData.isNotEmpty) {
+            _weight.text = receivedData;
+          }
+        });
+      });
+    } catch (e) {
+      Logger().e(e.toString());
+    }
+  }
+
+  /// Disconnect bluetooth device
+  Future<void> _disconnectFromDevice() async {
+    if (_connection != null) {
+      await _connection!.close();
+      setState(() {
+        _connection = null;
+        isConnected = false;
+        _selectedDevice = null;
+        receivedData = '';
+      });
+      Logger().i('Disconnected');
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
     _tabController.dispose();
+    _disconnectFromDevice();
   }
 
   @override
@@ -85,8 +175,9 @@ class _DashboardScreenState extends State<DashboardScreen>
     return Scaffold(
         body: MultiBlocListener(
       listeners: [
+        /// Listener for Deposit
         BlocListener<DepositBloc, DepositState>(
-          listener: (context, state) {
+          listener: (context, state) async {
             if (state.status.isLoading) {
               showDialog(
                 context: context,
@@ -100,6 +191,9 @@ class _DashboardScreenState extends State<DashboardScreen>
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Data berhasil ditambahkan')),
               );
+              if (selectedIndexDeposit != null) {
+                await _deleteDepositAtIndex(selectedIndexDeposit!);
+              }
               setState(() {
                 _idNasabah.text = '';
                 selectedItem = null;
@@ -113,8 +207,10 @@ class _DashboardScreenState extends State<DashboardScreen>
             }
           },
         ),
+
+        /// Listener for Withdrawal
         BlocListener<WithdrawalBloc, WithdrawalState>(
-          listener: (context, state) {
+          listener: (context, state) async {
             if (state.status.isLoading) {
               showDialog(
                 context: context,
@@ -128,6 +224,9 @@ class _DashboardScreenState extends State<DashboardScreen>
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Penarikan berhasil')),
               );
+              if (selectedIndexWithdrawal != null) {
+                await _deleteWithdrawalAtIndex(selectedIndexWithdrawal!);
+              }
               setState(() {
                 _idNasabahWithdrawal.text = '';
                 _price.text = '';
@@ -173,21 +272,45 @@ class _DashboardScreenState extends State<DashboardScreen>
                       onToggle: (value) {
                         setState(() {
                           isSwitchedMode = value;
-                          if (isSwitchedMode == true) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('Fitur masih dalam pengembangan!'),
-                              ),
-                            );
-                          }
+                          isConnected
+                              ? _disconnectFromDevice()
+                              : _discoverDevices();
                         });
                       },
                     )
                   ],
-                )
+                ),
               ],
             ),
+            const Gap(8.0),
+            if (isSwitchedMode == true)
+              Container(
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black12),
+                  borderRadius: BorderRadius.circular(
+                    8,
+                  ),
+                ),
+                child: DropdownButton<BluetoothDevice>(
+                  underline: const SizedBox.shrink(),
+                  value: _selectedDevice,
+                  hint: const Text('Pilih Perangkat Bluetooth'),
+                  isExpanded: true,
+                  items: _devices.map((BluetoothDevice device) {
+                    return DropdownMenuItem<BluetoothDevice>(
+                      value: device,
+                      child: Text(device.name ?? 'Unknown'),
+                    );
+                  }).toList(),
+                  onChanged: (BluetoothDevice? newValue) {
+                    if (newValue != null) {
+                      _connectToDevice(newValue);
+                    }
+                  },
+                ),
+              ),
             const Gap(20.0),
             Expanded(
               child: SingleChildScrollView(
@@ -262,6 +385,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     ));
   }
 
+  /// Build Deposit form screen
   _buildScales(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -460,9 +584,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                         _weight.text != '' &&
                         selectedItem != null)
                     ? () {
-                        int total =
-                            int.parse(_weight.text) * int.parse(selectedPrice!);
-
                         showDialog(
                           context: context,
                           builder: (BuildContext dialogContext) {
@@ -472,20 +593,40 @@ class _DashboardScreenState extends State<DashboardScreen>
                                   'Apakah anda yakin akan melakukan setoran untuk nasabah ${_idNasabah.text}?'),
                               actions: <Widget>[
                                 TextButton(
-                                  onPressed: () {
-                                    context.read<DepositBloc>().add(
-                                          DepositEvent.postDeposit(
-                                            request: DepositRequestModel(
-                                              idUser:
-                                                  _idNasabah.text.toUpperCase(),
-                                              idWasteType:
-                                                  selectedItem!.id!.toString(),
-                                              weight: _weight.text,
-                                              price: total.toString(),
+                                  onPressed: () async {
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible:
+                                          false, // Mencegah dialog tertutup saat menunggu
+                                      builder: (BuildContext context) {
+                                        return const Dialog(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(16.0),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                CircularProgressIndicator(),
+                                                SizedBox(width: 20),
+                                                Text("Memeriksa koneksi..."),
+                                              ],
                                             ),
-                                            token: widget.token,
                                           ),
                                         );
+                                      },
+                                    );
+                                    bool isConnected =
+                                        await InternetConnectionChecker()
+                                            .hasConnection;
+
+                                    _buildPop();
+
+                                    if (isConnected) {
+                                      Logger().i('Terhubung ke internet');
+                                      _handleSendData();
+                                    } else {
+                                      _handleSaveDepositToLocal();
+                                      Logger().i('Tidak terhubung ke internet');
+                                    }
                                   },
                                   child: const Text('Ya, Setor'),
                                 ),
@@ -517,6 +658,285 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
+  /// Send data to database for deposit
+  _handleSendData() {
+    int total = int.parse(_weight.text) * int.parse(selectedPrice!);
+    context.read<DepositBloc>().add(
+          DepositEvent.postDeposit(
+            request: DepositRequestModel(
+              idUser: _idNasabah.text.toUpperCase(),
+              idWasteType: selectedItem!.id!.toString(),
+              weight: _weight.text,
+              price: total.toString(),
+            ),
+            token: widget.token,
+          ),
+        );
+  }
+
+  /// Save data to local deposit
+  _handleSaveDepositToLocal() async {
+    int total = int.parse(_weight.text) * int.parse(selectedPrice!);
+    DepositRequestModel newDeposit = DepositRequestModel(
+      idUser: _idNasabah.text.toUpperCase(),
+      idWasteType: selectedItem!.id!.toString(),
+      weight: _weight.text,
+      price: total.toString(),
+    );
+
+    setState(() {
+      _depositList.add(newDeposit);
+    });
+
+    await saveListDeposit(_depositList);
+    Logger().i('Berhasil simpan $_depositList');
+    setState(() {
+      _idNasabah.text = '';
+      selectedItem = null;
+      _weight.text = '';
+    });
+    _buildPop();
+  }
+
+  /// Save to list deposit
+  Future<void> saveListDeposit(List<DepositRequestModel> listDeposit) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> jsonList =
+        listDeposit.map((item) => jsonEncode(item.toJson())).toList();
+    await prefs.setStringList('listDeposit', jsonList);
+  }
+
+  /// Get list deposit
+  Future<List<DepositRequestModel>> getListDeposit() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> jsonList = prefs.getStringList('listDeposit') ?? [];
+    return jsonList
+        .map((item) => DepositRequestModel.fromJson(jsonDecode(item)))
+        .toList();
+  }
+
+  /// Load list deposit from local
+  Future<void> _loadListDeposit() async {
+    List<DepositRequestModel> list = await getListDeposit();
+    setState(() {
+      _depositList = list;
+    });
+  }
+
+  /// Delete deposit based on index
+  Future<void> _deleteDepositAtIndex(int index) async {
+    List<DepositRequestModel> list = await getListDeposit();
+    list.removeAt(index);
+    await saveListDeposit(list);
+    setState(() {
+      _depositList = list;
+    });
+    Logger().i('Data berhasil dihapus');
+  }
+
+  /// Build list card ui for local deposit
+  _buildListLocalDeposit(
+      BuildContext context, DepositRequestModel deposit, int index) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.black12,
+        ),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Jumlah Setoran',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  formatCurrency(double.parse(deposit.price!)),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.teal,
+                  ),
+                ),
+              ],
+            ),
+            const Gap(8),
+            _buildRowText(
+              context,
+              'ID Nasabah',
+              '${deposit.idUser}',
+            ),
+            const Gap(8),
+            _buildRowText(
+              context,
+              'Berat',
+              '${deposit.weight} kg',
+            ),
+            const Gap(8),
+            _buildRowText(
+              context,
+              'Jenis Sampah',
+              '${deposit.idWasteType}',
+            ),
+            const Gap(12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        )),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext dialogContext) {
+                          return AlertDialog(
+                            title: const Text('Hapus Setoran'),
+                            content: const Text(
+                                'Apakah anda yakin akan menghapus setoran?'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  _deleteDepositAtIndex(index);
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Ya, Hapus'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(dialogContext).pop();
+                                },
+                                child: const Text('Tidak'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: const Text(
+                      'Hapus',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                const Gap(8.0),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        )),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext dialogContext) {
+                          return AlertDialog(
+                            title: const Text('Setoran'),
+                            content: const Text(
+                                'Apakah anda yakin akan melakukan upload setoran?'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () async {
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible:
+                                        false, // Mencegah dialog tertutup saat menunggu
+                                    builder: (BuildContext context) {
+                                      return const Dialog(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(16.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              CircularProgressIndicator(),
+                                              SizedBox(width: 20),
+                                              Text("Memeriksa koneksi..."),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                  bool isConnected =
+                                      await InternetConnectionChecker()
+                                          .hasConnection;
+
+                                  _buildPop();
+
+                                  if (isConnected) {
+                                    selectedIndexDeposit = index;
+                                    _buildUploadFromLocalDeposit(deposit);
+                                    Logger().i('Terhubung ke internet');
+                                  } else {
+                                    _buildNotConnected();
+                                    _buildPop();
+                                    Logger().i('Tidak terhubung ke internet');
+                                  }
+                                },
+                                child: const Text('Ya, Setor'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(dialogContext).pop();
+                                },
+                                child: const Text('Tidak'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: const Text(
+                      'Setor',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Upload data from local deposit to database
+  _buildUploadFromLocalDeposit(DepositRequestModel data) {
+    context.read<DepositBloc>().add(
+          DepositEvent.postDeposit(
+            request: DepositRequestModel(
+              idUser: data.idUser,
+              idWasteType: data.idWasteType,
+              weight: data.weight,
+              price: data.price,
+            ),
+            token: widget.token,
+          ),
+        );
+  }
+
+  /// Build form ui for withdrawal
   _buildWithdrawal(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -681,18 +1101,40 @@ class _DashboardScreenState extends State<DashboardScreen>
                                   'Apakah anda yakin akan melakukan penarikan untuk nasabah ${_idNasabahWithdrawal.text}?'),
                               actions: <Widget>[
                                 TextButton(
-                                  onPressed: () {
-                                    context.read<WithdrawalBloc>().add(
-                                          WithdrawalEvent.postWithdrawal(
-                                            request: WithdrawalsRequestModel(
-                                              idUser: _idNasabahWithdrawal.text
-                                                  .toUpperCase(),
-                                              price: _price.text,
-                                              status: _note.text,
+                                  onPressed: () async {
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible:
+                                          false, // Mencegah dialog tertutup saat menunggu
+                                      builder: (BuildContext context) {
+                                        return const Dialog(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(16.0),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                CircularProgressIndicator(),
+                                                SizedBox(width: 20),
+                                                Text("Memeriksa koneksi..."),
+                                              ],
                                             ),
-                                            token: widget.token,
                                           ),
                                         );
+                                      },
+                                    );
+                                    bool isConnected =
+                                        await InternetConnectionChecker()
+                                            .hasConnection;
+
+                                    _buildPop();
+
+                                    if (isConnected) {
+                                      Logger().i('Terhubung ke internet');
+                                      _handleSendDataWithdrawal();
+                                    } else {
+                                      _handleSaveWithdrawalToLocal();
+                                      Logger().i('Tidak terhubung ke internet');
+                                    }
                                   },
                                   child: const Text('Ya, Tarik Dana'),
                                 ),
@@ -724,6 +1166,275 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
+  /// Send data to database withdrawal
+  _handleSendDataWithdrawal() {
+    context.read<WithdrawalBloc>().add(
+          WithdrawalEvent.postWithdrawal(
+            request: WithdrawalsRequestModel(
+              idUser: _idNasabahWithdrawal.text.toUpperCase(),
+              price: _price.text,
+              status: _note.text,
+            ),
+            token: widget.token,
+          ),
+        );
+  }
+
+  /// Save data withdrawal to local
+  _handleSaveWithdrawalToLocal() async {
+    WithdrawalsRequestModel newWithdrawal = WithdrawalsRequestModel(
+      idUser: _idNasabahWithdrawal.text.toUpperCase(),
+      price: _price.text,
+      status: _note.text,
+    );
+
+    setState(() {
+      _withdrawalList.add(newWithdrawal);
+    });
+
+    await saveListWithdrawal(_withdrawalList);
+    Logger().i('Berhasil simpan $_withdrawalList');
+    setState(() {
+      _idNasabahWithdrawal.text = '';
+      _price.text = '';
+      _note.text = '';
+    });
+    _buildPop();
+  }
+
+  /// Upload data from local withdrawal to database
+  _buildUploadFromLocalWithdrawal(WithdrawalsRequestModel data) {
+    context.read<WithdrawalBloc>().add(
+          WithdrawalEvent.postWithdrawal(
+            request: WithdrawalsRequestModel(
+              idUser: data.idUser,
+              price: data.price,
+              status: data.status,
+            ),
+            token: widget.token,
+          ),
+        );
+  }
+
+  /// Save list withdrawal
+  Future<void> saveListWithdrawal(
+      List<WithdrawalsRequestModel> listWithdrawal) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> jsonList =
+        listWithdrawal.map((item) => jsonEncode(item.toJson())).toList();
+    await prefs.setStringList('listWithdrawal', jsonList);
+  }
+
+  /// Get list withdrawal
+  Future<List<WithdrawalsRequestModel>> getListWithdrawal() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> jsonList = prefs.getStringList('listWithdrawal') ?? [];
+    return jsonList
+        .map((item) => WithdrawalsRequestModel.fromJson(jsonDecode(item)))
+        .toList();
+  }
+
+  /// Load list withdrawal
+  Future<void> _loadListWithdrawal() async {
+    List<WithdrawalsRequestModel> list = await getListWithdrawal();
+    setState(() {
+      _withdrawalList = list;
+    });
+  }
+
+  /// Delete list withdrawal by index
+  Future<void> _deleteWithdrawalAtIndex(int index) async {
+    List<WithdrawalsRequestModel> list = await getListWithdrawal();
+    list.removeAt(index);
+    await saveListWithdrawal(list);
+    setState(() {
+      _withdrawalList = list;
+    });
+    Logger().i('Data berhasil dihapus');
+  }
+
+  /// Buat list local withdrawal
+  _buildListLocalWithdrawal(
+      BuildContext context, WithdrawalsRequestModel withdrawal, int index) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.black12,
+        ),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Jumlah Penarikan',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  formatCurrency(double.parse(withdrawal.price!)),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.teal,
+                  ),
+                ),
+              ],
+            ),
+            const Gap(8),
+            _buildRowText(
+              context,
+              'ID Nasabah',
+              '${withdrawal.idUser}',
+            ),
+            const Gap(8),
+            _buildRowText(
+              context,
+              'Status',
+              '${withdrawal.status}',
+            ),
+            const Gap(12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        )),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext dialogContext) {
+                          return AlertDialog(
+                            title: const Text('Hapus Penarikan'),
+                            content: const Text(
+                                'Apakah anda yakin akan menghapus penarikan?'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  _deleteWithdrawalAtIndex(index);
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Ya, Hapus'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(dialogContext).pop();
+                                },
+                                child: const Text('Tidak'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: const Text(
+                      'Hapus',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                const Gap(8.0),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        )),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext dialogContext) {
+                          return AlertDialog(
+                            title: const Text('Penarikan'),
+                            content: const Text(
+                                'Apakah anda yakin akan melakukan upload penarikan?'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () async {
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible:
+                                        false, // Mencegah dialog tertutup saat menunggu
+                                    builder: (BuildContext context) {
+                                      return const Dialog(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(16.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              CircularProgressIndicator(),
+                                              SizedBox(width: 20),
+                                              Text("Memeriksa koneksi..."),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                  bool isConnected =
+                                      await InternetConnectionChecker()
+                                          .hasConnection;
+
+                                  _buildPop();
+
+                                  if (isConnected) {
+                                    selectedIndexWithdrawal = index;
+                                    _buildUploadFromLocalWithdrawal(withdrawal);
+                                    Logger().i('Terhubung ke internet');
+                                  } else {
+                                    _buildNotConnected();
+                                    _buildPop();
+                                    Logger().i('Tidak terhubung ke internet');
+                                  }
+                                },
+                                child: const Text('Ya, Tarik'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(dialogContext).pop();
+                                },
+                                child: const Text('Tidak'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: const Text(
+                      'Tarik',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build draft list
   _buildDraft(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -741,22 +1452,98 @@ class _DashboardScreenState extends State<DashboardScreen>
             fontStyle: FontStyle.italic,
           ),
         ),
-        SizedBox(
-          height: 250,
-          width: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Assets.icons.file14592169.image(
-                height: 100,
-                width: 100,
-              ),
-              const Gap(8.0),
-              const Text('Tidak draft yang tersimpan')
-            ],
+        const Gap(16.0),
+        _selectedTabBarIndex == 0
+            ? _depositList.isNotEmpty
+                ? ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      return _buildListLocalDeposit(
+                        context,
+                        _depositList[index],
+                        index,
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return const Gap(12.0);
+                    },
+                    itemCount: _depositList.length,
+                  )
+                : _buildEmptyDraft()
+            : _withdrawalList.isNotEmpty
+                ? ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      return _buildListLocalWithdrawal(
+                        context,
+                        _withdrawalList[index],
+                        index,
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return const Gap(12.0);
+                    },
+                    itemCount: _withdrawalList.length,
+                  )
+                : _buildEmptyDraft(),
+      ],
+    );
+  }
+
+  /// Build draft is empty
+  _buildEmptyDraft() {
+    return SizedBox(
+      height: 250,
+      width: double.infinity,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Assets.icons.file14592169.image(
+            height: 100,
+            width: 100,
+          ),
+          const Gap(8.0),
+          const Text('Tidak draft yang tersimpan')
+        ],
+      ),
+    );
+  }
+
+  /// Build row text
+  _buildRowText(
+    BuildContext context,
+    String title,
+    String value,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],
     );
+  }
+
+  /// Build pop
+  _buildPop() {
+    Navigator.of(context).pop();
+  }
+
+  /// Build not connected
+  _buildNotConnected() {
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tidak ada koneksi internet!')));
   }
 }

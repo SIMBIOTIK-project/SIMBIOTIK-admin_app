@@ -15,7 +15,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:simbiotik_admin/core/blocs/user/user_bloc.dart';
+import 'package:simbiotik_admin/core/routers/routers.dart';
 import 'package:simbiotik_admin/models/models.dart';
 
 class CustomerScreen extends StatefulWidget {
@@ -49,11 +51,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
     return Scaffold(
         body: BlocConsumer<UserBloc, UserState>(
       listener: (context, state) {
-        if (state.status.isLoading) {
-          const Center(
-            child: CircularProgressIndicator(),
-          );
-        } else if (state.status.isError) {
+        if (state.status.isError) {
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -64,7 +62,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
                 InkWell(
                   onTap: () {
                     _handleRefreshData(
-                      context,
                       '',
                     );
                   },
@@ -81,7 +78,11 @@ class _CustomerScreenState extends State<CustomerScreen> {
         }
       },
       builder: (context, state) {
-        if (state.allData != null) {
+        if (state.status.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (state.status.isLoaded && state.allData != null) {
           allUser = state.allData!;
           return Padding(
             padding: const EdgeInsets.all(16.0),
@@ -99,12 +100,15 @@ class _CustomerScreenState extends State<CustomerScreen> {
                       ),
                     ),
                     InkWell(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Fitur masih dalam pengembangan!'),
-                          ),
+                      onTap: () async {
+                        bool? result = await GoRouter.of(context).pushNamed(
+                          AppRouterConstants.registerScreen,
+                          extra: widget.token,
                         );
+
+                        if (result == true) {
+                          _handleRefreshData('');
+                        }
                       },
                       child: const Row(
                         children: [
@@ -150,7 +154,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                     ),
                     onChanged: (value) {
                       setState(() {
-                        _handleRefreshData(context, value);
+                        _handleRefreshData(value);
                       });
                     },
                   ),
@@ -252,7 +256,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
     );
   }
 
-  _handleRefreshData(BuildContext context, String? keyword) {
+  _handleRefreshData(String? keyword) {
     context.read<UserBloc>().add(UserEvent.fetchAll(
           token: widget.token,
           status: 'nasabah',

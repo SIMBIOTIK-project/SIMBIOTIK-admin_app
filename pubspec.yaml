@@ -51,6 +51,10 @@ dependencies:
   flutter_switch: ^0.3.2
   logger: ^2.4.0
   firebase_core: ^3.4.0
+  flutter_bluetooth_serial: ^0.4.0
+  permission_handler: ^11.3.1
+  collection: ^1.18.0
+  internet_connection_checker: ^2.0.0
 
 dev_dependencies:
   flutter_test:

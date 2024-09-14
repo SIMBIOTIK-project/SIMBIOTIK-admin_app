@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:simbiotik_admin/core/blocs/deposit/deposit.dart';
@@ -115,11 +116,7 @@ class _HistoriesScreenState extends State<HistoriesScreen>
   _buildDepositList(BuildContext context) {
     return BlocConsumer<DepositBloc, DepositState>(
       listener: (context, state) {
-        if (state.status.isLoading) {
-          const Center(
-            child: CircularProgressIndicator(),
-          );
-        } else if (state.status.isError) {
+        if (state.status.isError) {
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -146,7 +143,13 @@ class _HistoriesScreenState extends State<HistoriesScreen>
         }
       },
       builder: (context, state) {
-        if (state.allData != null) {
+        if (state.status.isLoading) {
+          return const Expanded(
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else if (state.status.isLoaded && state.allData != null) {
           allDeposit = state.allData!;
           return Expanded(
             child: ListView.separated(

@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simbiotik_admin/core/routers/routers.dart';
+import 'package:simbiotik_admin/screens/register/register_screen.dart';
 import 'package:simbiotik_admin/screens/screens.dart';
 
 class AppRouterConfig {
@@ -38,7 +39,16 @@ class AppRouterConfig {
                   token: token,
                 );
               },
-            )
+            ),
+            GoRoute(
+                name: AppRouterConstants.registerScreen,
+                path: AppRouterConstants.registerScreen,
+                builder: (context, state) {
+                  String token = state.extra as String;
+                  return RegisterScreen(
+                    token: token,
+                  );
+                })
           ],
           errorBuilder: (context, state) {
             return const Scaffold(
