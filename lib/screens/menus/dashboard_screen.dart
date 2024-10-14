@@ -533,7 +533,13 @@ class _DashboardScreenState extends State<DashboardScreen>
                             items.map<DropdownMenuItem<WasteTypesModel>>((e) {
                           return DropdownMenuItem(
                             value: e,
-                            child: Text(e.type!),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('${e.type}'),
+                                Text('Rp.${e.price}'),
+                              ],
+                            ),
                           );
                         }).toList(),
                         onChanged: (value) {
@@ -660,14 +666,15 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   /// Send data to database for deposit
   _handleSendData() {
-    int total = int.parse(_weight.text) * int.parse(selectedPrice!);
+    double total = double.parse(_weight.text) * double.parse(selectedPrice!);
+    int totalPrice = total.toInt();
     context.read<DepositBloc>().add(
           DepositEvent.postDeposit(
             request: DepositRequestModel(
               idUser: _idNasabah.text.toUpperCase(),
               idWasteType: selectedItem!.id!.toString(),
               weight: _weight.text,
-              price: total.toString(),
+              price: totalPrice.toString(),
             ),
             token: widget.token,
           ),
