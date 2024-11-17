@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:720196338277:android:0a6184cd58c4b58cc37c8c",
         "android_client_info": {
-          "package_name": "com.example.simbiotik_admin"
+          "package_name": "com.simbiotik.admin"
         }
       },
       "oauth_client": [],

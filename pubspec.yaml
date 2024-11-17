@@ -55,6 +55,7 @@ dependencies:
   permission_handler: ^11.3.1
   collection: ^1.18.0
   internet_connection_checker: ^2.0.0
+  change_app_package_name: ^1.4.0
 
 dev_dependencies:
   flutter_test:

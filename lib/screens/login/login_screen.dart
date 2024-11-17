@@ -229,6 +229,7 @@ class _LoginScreenContentState extends State<LoginScreenContent> {
                 ),
                 BlocConsumer<AuthBloc, AuthState>(
                   listener: (context, state) {
+                    Logger().d(state.error);
                     if (state.status.isLoaded) {
                       if (state.data?.status == StatusUser.admin.value) {
                         if (_rememberMe == true) {
