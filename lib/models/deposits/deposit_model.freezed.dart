@@ -25,11 +25,11 @@ mixin _$DepositModel {
   @JsonKey(name: 'id_user')
   String? get idUser => throw _privateConstructorUsedError;
   @JsonKey(name: 'id_wastetype')
-  String? get idWastetype => throw _privateConstructorUsedError;
+  int? get idWastetype => throw _privateConstructorUsedError;
   @JsonKey(name: 'weight')
-  String? get weight => throw _privateConstructorUsedError;
+  int? get weight => throw _privateConstructorUsedError;
   @JsonKey(name: 'price')
-  String? get price => throw _privateConstructorUsedError;
+  int? get price => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
   DateTime? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
@@ -56,9 +56,9 @@ abstract class $DepositModelCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: 'id') int? id,
       @JsonKey(name: 'id_user') String? idUser,
-      @JsonKey(name: 'id_wastetype') String? idWastetype,
-      @JsonKey(name: 'weight') String? weight,
-      @JsonKey(name: 'price') String? price,
+      @JsonKey(name: 'id_wastetype') int? idWastetype,
+      @JsonKey(name: 'weight') int? weight,
+      @JsonKey(name: 'price') int? price,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
       @JsonKey(name: 'user') UserModel? user,
@@ -105,15 +105,15 @@ class _$DepositModelCopyWithImpl<$Res, $Val extends DepositModel>
       idWastetype: freezed == idWastetype
           ? _value.idWastetype
           : idWastetype // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as int?,
       weight: freezed == weight
           ? _value.weight
           : weight // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as int?,
       price: freezed == price
           ? _value.price
           : price // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as int?,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -173,9 +173,9 @@ abstract class _$$DepositModelImplCopyWith<$Res>
   $Res call(
       {@JsonKey(name: 'id') int? id,
       @JsonKey(name: 'id_user') String? idUser,
-      @JsonKey(name: 'id_wastetype') String? idWastetype,
-      @JsonKey(name: 'weight') String? weight,
-      @JsonKey(name: 'price') String? price,
+      @JsonKey(name: 'id_wastetype') int? idWastetype,
+      @JsonKey(name: 'weight') int? weight,
+      @JsonKey(name: 'price') int? price,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
       @JsonKey(name: 'user') UserModel? user,
@@ -222,15 +222,15 @@ class __$$DepositModelImplCopyWithImpl<$Res>
       idWastetype: freezed == idWastetype
           ? _value.idWastetype
           : idWastetype // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as int?,
       weight: freezed == weight
           ? _value.weight
           : weight // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as int?,
       price: freezed == price
           ? _value.price
           : price // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as int?,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -281,13 +281,13 @@ class _$DepositModelImpl implements _DepositModel {
   final String? idUser;
   @override
   @JsonKey(name: 'id_wastetype')
-  final String? idWastetype;
+  final int? idWastetype;
   @override
   @JsonKey(name: 'weight')
-  final String? weight;
+  final int? weight;
   @override
   @JsonKey(name: 'price')
-  final String? price;
+  final int? price;
   @override
   @JsonKey(name: 'created_at')
   final DateTime? createdAt;
@@ -354,9 +354,9 @@ abstract class _DepositModel implements DepositModel {
   const factory _DepositModel(
           {@JsonKey(name: 'id') final int? id,
           @JsonKey(name: 'id_user') final String? idUser,
-          @JsonKey(name: 'id_wastetype') final String? idWastetype,
-          @JsonKey(name: 'weight') final String? weight,
-          @JsonKey(name: 'price') final String? price,
+          @JsonKey(name: 'id_wastetype') final int? idWastetype,
+          @JsonKey(name: 'weight') final int? weight,
+          @JsonKey(name: 'price') final int? price,
           @JsonKey(name: 'created_at') final DateTime? createdAt,
           @JsonKey(name: 'updated_at') final DateTime? updatedAt,
           @JsonKey(name: 'user') final UserModel? user,
@@ -375,13 +375,13 @@ abstract class _DepositModel implements DepositModel {
   String? get idUser;
   @override
   @JsonKey(name: 'id_wastetype')
-  String? get idWastetype;
+  int? get idWastetype;
   @override
   @JsonKey(name: 'weight')
-  String? get weight;
+  int? get weight;
   @override
   @JsonKey(name: 'price')
-  String? get price;
+  int? get price;
   @override
   @JsonKey(name: 'created_at')
   DateTime? get createdAt;

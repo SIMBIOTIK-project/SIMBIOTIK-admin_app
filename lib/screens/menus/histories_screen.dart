@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:logger/web.dart';
 import 'package:simbiotik_admin/core/blocs/deposit/deposit.dart';
 import 'package:simbiotik_admin/core/blocs/deposit/deposit_bloc.dart';
 import 'package:simbiotik_admin/core/blocs/withdrawal/withdrawal_bloc.dart';
@@ -116,6 +117,7 @@ class _HistoriesScreenState extends State<HistoriesScreen>
   _buildDepositList(BuildContext context) {
     return BlocConsumer<DepositBloc, DepositState>(
       listener: (context, state) {
+        Logger().d(state.error);
         if (state.status.isError) {
           Center(
             child: Column(
@@ -172,6 +174,7 @@ class _HistoriesScreenState extends State<HistoriesScreen>
   _buildWithdrawalList(BuildContext context) {
     return BlocConsumer<WithdrawalBloc, WithdrawalState>(
       listener: (context, state) {
+        Logger().d(state.error);
         if (state.status.isLoading) {
           const Center(
             child: CircularProgressIndicator(),
@@ -248,7 +251,7 @@ class _HistoriesScreenState extends State<HistoriesScreen>
                   ),
                 ),
                 Text(
-                  formatCurrency(double.parse(deposit.price!)),
+                  formatCurrency(double.parse(deposit.price!.toString())),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -306,7 +309,7 @@ class _HistoriesScreenState extends State<HistoriesScreen>
                   ),
                 ),
                 Text(
-                  formatCurrency(double.parse(withdarawal.price!)),
+                  formatCurrency(double.parse(withdarawal.price!.toString())),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,

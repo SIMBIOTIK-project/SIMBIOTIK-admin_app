@@ -496,6 +496,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             const Gap(8.0),
             BlocBuilder<WasteTypeBloc, WasteTypeState>(
               builder: (context, state) {
+                Logger().d(state.error);
                 if (state.status.isLoading) {
                   return const Center(
                     child: CircularProgressIndicator(),
@@ -545,7 +546,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                         onChanged: (value) {
                           setState(() {
                             selectedItem = value;
-                            selectedPrice = value?.price;
+                            selectedPrice = value?.price.toString();
                           });
                         },
                       ),
@@ -621,7 +622,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                       },
                                     );
                                     bool isConnected =
-                                        await InternetConnectionChecker()
+                                        await InternetConnectionChecker.instance
                                             .hasConnection;
 
                                     _buildPop();
@@ -882,7 +883,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                     },
                                   );
                                   bool isConnected =
-                                      await InternetConnectionChecker()
+                                      await InternetConnectionChecker.instance
                                           .hasConnection;
 
                                   _buildPop();
@@ -1130,7 +1131,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                       },
                                     );
                                     bool isConnected =
-                                        await InternetConnectionChecker()
+                                        await InternetConnectionChecker.instance
                                             .hasConnection;
 
                                     _buildPop();
@@ -1395,7 +1396,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                     },
                                   );
                                   bool isConnected =
-                                      await InternetConnectionChecker()
+                                      await InternetConnectionChecker.instance
                                           .hasConnection;
 
                                   _buildPop();
