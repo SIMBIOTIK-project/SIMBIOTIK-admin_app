@@ -503,7 +503,22 @@ class _DashboardScreenState extends State<DashboardScreen>
                   );
                 } else {
                   if (state.error != null && state.allData == null) {
-                    return const Text('Data tidak ditemukan');
+                    return Center(
+                      child: Column(
+                        children: [
+                          const Text('Data tidak ditemukan'),
+                          TextButton(
+                            onPressed: () {
+                              context.read<WasteTypeBloc>().add(
+                                    WasteTypeEvent.fetchAll(
+                                        token: widget.token),
+                                  );
+                            },
+                            child: const Text('Muat Ulang'),
+                          )
+                        ],
+                      ),
+                    );
                   } else {
                     items = state.allData ?? [];
                     return Container(
@@ -622,8 +637,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                                       },
                                     );
                                     bool isConnected =
-                                        await InternetConnectionChecker.instance
-                                            .hasConnection;
+                                        await InternetConnectionChecker
+                                            .instance.hasConnection;
 
                                     _buildPop();
 
@@ -883,8 +898,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                                     },
                                   );
                                   bool isConnected =
-                                      await InternetConnectionChecker.instance
-                                          .hasConnection;
+                                      await InternetConnectionChecker
+                                          .instance.hasConnection;
 
                                   _buildPop();
 
@@ -1131,8 +1146,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                                       },
                                     );
                                     bool isConnected =
-                                        await InternetConnectionChecker.instance
-                                            .hasConnection;
+                                        await InternetConnectionChecker
+                                            .instance.hasConnection;
 
                                     _buildPop();
 
@@ -1396,8 +1411,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                                     },
                                   );
                                   bool isConnected =
-                                      await InternetConnectionChecker.instance
-                                          .hasConnection;
+                                      await InternetConnectionChecker
+                                          .instance.hasConnection;
 
                                   _buildPop();
 

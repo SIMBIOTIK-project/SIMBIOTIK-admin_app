@@ -83,222 +83,225 @@ class _LoginScreenContentState extends State<LoginScreenContent> {
     return BlocProvider(
       create: (context) => AuthBloc(AuthRepository()),
       child: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Assets.images.simbiotik2.image(
-                  width: 40,
-                  height: 40,
-                ),
-                const Text(
-                  'Selamat Datang',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+        body: Container(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Assets.images.simbiotik2.image(
+                    width: 40,
+                    height: 40,
                   ),
-                ),
-                const Row(
-                  children: [
-                    Text(
-                      'SIMBIO',
-                      style: TextStyle(
-                        color: AppColors.hijauSimbiotik,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 28,
+                  const Text(
+                    'Selamat Datang',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const Row(
+                    children: [
+                      Text(
+                        'SIMBIO',
+                        style: TextStyle(
+                          color: AppColors.hijauSimbiotik,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 28,
+                        ),
+                      ),
+                      Text(
+                        'TIK',
+                        style: TextStyle(
+                          color: AppColors.biruSimbiotik,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 28,
+                        ),
+                      ),
+                      Gap(8.0),
+                      Text(
+                        'Pro',
+                        style: TextStyle(
+                            fontWeight: FontWeight.normal,
+                            fontSize: 24,
+                            fontStyle: FontStyle.italic),
+                      ),
+                    ],
+                  ),
+                  const Text(
+                    'SIMBIOTIK Pro adalah aplikasi mobile yang dirancang khusus untuk admin, memudahkan Anda dalam mengelola setoran, menambahkan nasabah baru, serta menambah jenis sampah.',
+                    style: TextStyle(
+                      fontSize: 8,
+                    ),
+                    textAlign: TextAlign.justify,
+                  ),
+                  const Gap(20),
+                  const Text(
+                    'Masuk',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  const Gap(8.0),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.black12,
+                      ),
+                      borderRadius: BorderRadius.circular(
+                        8.0,
                       ),
                     ),
-                    Text(
-                      'TIK',
-                      style: TextStyle(
-                        color: AppColors.biruSimbiotik,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 28,
-                      ),
+                    height: 40,
+                    padding: const EdgeInsets.fromLTRB(
+                      8,
+                      4,
+                      8,
+                      4,
                     ),
-                    Gap(8.0),
-                    Text(
-                      'Pro',
-                      style: TextStyle(
-                          fontWeight: FontWeight.normal,
-                          fontSize: 24,
-                          fontStyle: FontStyle.italic),
-                    ),
-                  ],
-                ),
-                const Text(
-                  'SIMBIOTIK Pro adalah aplikasi mobile yang dirancang khusus untuk admin, memudahkan Anda dalam mengelola setoran, menambahkan nasabah baru, serta menambah jenis sampah.',
-                  style: TextStyle(
-                    fontSize: 8,
-                  ),
-                  textAlign: TextAlign.justify,
-                ),
-                const Gap(20),
-                const Text(
-                  'Masuk',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-                const Gap(8.0),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.black12,
-                    ),
-                    borderRadius: BorderRadius.circular(
-                      8.0,
-                    ),
-                  ),
-                  height: 40,
-                  padding: const EdgeInsets.fromLTRB(
-                    8,
-                    4,
-                    8,
-                    4,
-                  ),
-                  child: TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      hintText: 'Masukkan Email',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 8.0,
-                      ),
-                    ),
-                  ),
-                ),
-                const Gap(8.0),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.black12,
-                    ),
-                    borderRadius: BorderRadius.circular(
-                      8.0,
-                    ),
-                  ),
-                  height: 40.0,
-                  padding: const EdgeInsets.fromLTRB(
-                    8,
-                    4,
-                    8,
-                    4,
-                  ),
-                  child: TextFormField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                        hintText: 'Masukkan Password',
+                    child: TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                        hintText: 'Masukkan Username',
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
+                        contentPadding: EdgeInsets.symmetric(
                           vertical: 8.0,
                         ),
-                        suffixIcon: InkWell(
-                          onTap: () {
-                            setState(() {
-                              _obsecurePassword = !_obsecurePassword;
-                            });
-                          },
-                          child: Icon(
-                            _obsecurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            size: 20,
-                          ),
-                        )),
-                    obscureText: _obsecurePassword,
+                      ),
+                    ),
                   ),
-                ),
-                Row(
-                  children: [
-                    const Text(
-                      'Ingat Saya',
-                      style: TextStyle(fontSize: 12.0),
+                  const Gap(8.0),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.black12,
+                      ),
+                      borderRadius: BorderRadius.circular(
+                        8.0,
+                      ),
                     ),
-                    Checkbox(
-                      activeColor: Colors.lightBlue,
-                      value: _rememberMe,
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          _rememberMe = newValue ?? false;
-                        });
-                      },
+                    height: 40.0,
+                    padding: const EdgeInsets.fromLTRB(
+                      8,
+                      4,
+                      8,
+                      4,
                     ),
-                  ],
-                ),
-                BlocConsumer<AuthBloc, AuthState>(
-                  listener: (context, state) {
-                    Logger().d(state.error);
-                    if (state.status.isLoaded) {
-                      if (state.data?.status == StatusUser.admin.value) {
-                        if (_rememberMe == true) {
-                          if (state.token != null) {
-                            _savedToken(state.token!);
+                    child: TextFormField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                          hintText: 'Masukkan Password',
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 8.0,
+                          ),
+                          suffixIcon: InkWell(
+                            onTap: () {
+                              setState(() {
+                                _obsecurePassword = !_obsecurePassword;
+                              });
+                            },
+                            child: Icon(
+                              _obsecurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              size: 20,
+                            ),
+                          )),
+                      obscureText: _obsecurePassword,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      const Text(
+                        'Ingat Saya',
+                        style: TextStyle(fontSize: 12.0),
+                      ),
+                      Checkbox(
+                        activeColor: Colors.lightBlue,
+                        value: _rememberMe,
+                        onChanged: (bool? newValue) {
+                          setState(() {
+                            _rememberMe = newValue ?? false;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  BlocConsumer<AuthBloc, AuthState>(
+                    listener: (context, state) {
+                      Logger().d(state.error);
+                      if (state.status.isLoaded) {
+                        if (state.data?.status == StatusUser.admin.value) {
+                          if (_rememberMe == true) {
+                            if (state.token != null) {
+                              _savedToken(state.token!);
+                              GoRouter.of(context).pushReplacement(
+                                AppRouterConstants.homeScreen,
+                                extra: state.token,
+                              );
+                            }
+                          } else {
                             GoRouter.of(context).pushReplacement(
                               AppRouterConstants.homeScreen,
                               extra: state.token,
                             );
                           }
                         } else {
-                          GoRouter.of(context).pushReplacement(
-                            AppRouterConstants.homeScreen,
-                            extra: state.token,
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Silahkan masuk menggunakan akun admin!'),
+                            ),
                           );
                         }
-                      } else {
+                      } else if (state.status.isError) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content:
-                                Text('Silahkan masuk menggunakan akun admin!'),
+                            content: Text(
+                                'Gagal masuk, silahkan periksa kembali email atau password!'),
                           ),
                         );
                       }
-                    } else if (state.status.isError) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'Gagal masuk, silahkan periksa kembali email atau password!'),
-                        ),
-                      );
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state.status.isLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
+                    },
+                    builder: (context, state) {
+                      if (state.status.isLoading) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
 
-                    return SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.hijauSimbiotik,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                            )),
-                        onPressed: () {
-                          context.read<AuthBloc>().add(
-                                AuthEvent.login(
-                                  email: _emailController.text,
-                                  password: _passwordController.text,
-                                ),
-                              );
-                        },
-                        child: const Text(
-                          'Masuk',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
+                      return SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.hijauSimbiotik,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                              )),
+                          onPressed: () {
+                            context.read<AuthBloc>().add(
+                                  AuthEvent.login(
+                                    name: _emailController.text,
+                                    password: _passwordController.text,
+                                  ),
+                                );
+                          },
+                          child: const Text(
+                            'Masuk',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ],
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),

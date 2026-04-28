@@ -13,9 +13,9 @@
 // limitations under the License.
 
 class ApiConstants {
-  static const String login = '/login';
-  static const String logout = '/logout';
-  static const String register = '/register';
+  static const String login = '/auth/login';
+  static const String logout = '/auth/logout';
+  static const String register = '/auth/register';
   static const String user = '/user';
   static const String wasteType = '/wastetypes';
   static const String deposit = '/deposits';

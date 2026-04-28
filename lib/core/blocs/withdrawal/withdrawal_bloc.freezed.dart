@@ -65,7 +65,9 @@ mixin _$WithdrawalEvent {
   }) =>
       throw _privateConstructorUsedError;
 
-  @JsonKey(ignore: true)
+  /// Create a copy of WithdrawalEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $WithdrawalEventCopyWith<WithdrawalEvent> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -89,6 +91,8 @@ class _$WithdrawalEventCopyWithImpl<$Res, $Val extends WithdrawalEvent>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of WithdrawalEvent
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -124,6 +128,8 @@ class __$$PostWithdrawalImplCopyWithImpl<$Res>
       _$PostWithdrawalImpl _value, $Res Function(_$PostWithdrawalImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of WithdrawalEvent
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -142,6 +148,8 @@ class __$$PostWithdrawalImplCopyWithImpl<$Res>
     ));
   }
 
+  /// Create a copy of WithdrawalEvent
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $WithdrawalsRequestModelCopyWith<$Res> get request {
@@ -178,7 +186,9 @@ class _$PostWithdrawalImpl implements _PostWithdrawal {
   @override
   int get hashCode => Object.hash(runtimeType, request, token);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of WithdrawalEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$PostWithdrawalImplCopyWith<_$PostWithdrawalImpl> get copyWith =>
@@ -265,8 +275,11 @@ abstract class _PostWithdrawal implements WithdrawalEvent {
   WithdrawalsRequestModel get request;
   @override
   String get token;
+
+  /// Create a copy of WithdrawalEvent
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$PostWithdrawalImplCopyWith<_$PostWithdrawalImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -290,6 +303,8 @@ class __$$FetchImplCopyWithImpl<$Res>
       _$FetchImpl _value, $Res Function(_$FetchImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of WithdrawalEvent
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -344,7 +359,9 @@ class _$FetchImpl implements _Fetch {
   @override
   int get hashCode => Object.hash(runtimeType, token, idUser, page);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of WithdrawalEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$FetchImplCopyWith<_$FetchImpl> get copyWith =>
@@ -432,8 +449,11 @@ abstract class _Fetch implements WithdrawalEvent {
   String get token;
   String? get idUser;
   int? get page;
+
+  /// Create a copy of WithdrawalEvent
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$FetchImplCopyWith<_$FetchImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -457,6 +477,8 @@ class __$$FetchAllImplCopyWithImpl<$Res>
       _$FetchAllImpl _value, $Res Function(_$FetchAllImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of WithdrawalEvent
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -503,7 +525,9 @@ class _$FetchAllImpl implements _FetchAll {
   @override
   int get hashCode => Object.hash(runtimeType, token, idUser);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of WithdrawalEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$FetchAllImplCopyWith<_$FetchAllImpl> get copyWith =>
@@ -588,8 +612,11 @@ abstract class _FetchAll implements WithdrawalEvent {
   @override
   String get token;
   String? get idUser;
+
+  /// Create a copy of WithdrawalEvent
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$FetchAllImplCopyWith<_$FetchAllImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -601,7 +628,9 @@ mixin _$WithdrawalState {
   List<WithdrawalModel>? get allData => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
 
-  @JsonKey(ignore: true)
+  /// Create a copy of WithdrawalState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $WithdrawalStateCopyWith<WithdrawalState> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -631,6 +660,8 @@ class _$WithdrawalStateCopyWithImpl<$Res, $Val extends WithdrawalState>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of WithdrawalState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -659,6 +690,8 @@ class _$WithdrawalStateCopyWithImpl<$Res, $Val extends WithdrawalState>
     ) as $Val);
   }
 
+  /// Create a copy of WithdrawalState
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $WithdrawalResponseModelCopyWith<$Res>? get data {
@@ -698,6 +731,8 @@ class __$$WithdrawalStateImplCopyWithImpl<$Res>
       _$WithdrawalStateImpl _value, $Res Function(_$WithdrawalStateImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of WithdrawalState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -776,7 +811,9 @@ class _$WithdrawalStateImpl implements _WithdrawalState {
   int get hashCode => Object.hash(runtimeType, status, data,
       const DeepCollectionEquality().hash(_allData), error);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of WithdrawalState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$WithdrawalStateImplCopyWith<_$WithdrawalStateImpl> get copyWith =>
@@ -799,8 +836,11 @@ abstract class _WithdrawalState implements WithdrawalState {
   List<WithdrawalModel>? get allData;
   @override
   String? get error;
+
+  /// Create a copy of WithdrawalState
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$WithdrawalStateImplCopyWith<_$WithdrawalStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
