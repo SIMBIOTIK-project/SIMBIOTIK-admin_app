@@ -22,16 +22,21 @@ flutter pub get
 
 - Run Project
 For Development
+- Change package name to ```com.simbiotik.admin.dev``` ```android/app/google-services.json```
+
 ```
 flutter run --flavor dev --target lib/main_dev.dart
 ```
 
 For Production
+- Change package name to ```com.simbiotik.admin``` ```android/app/google-services.json```
+
 ```
 flutter run --flavor prod --target lib/main_prod.dart
 ```
 
 Build Apk
+- Change package name to ```com.simbiotik.admin``` ```android/app/google-services.json```
 ```
 flutter build apk --flavor=prod --target=lib/main_prod.dart --dart-define-from-file=.env
 ```
