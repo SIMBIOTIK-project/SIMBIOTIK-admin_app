@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:logger/web.dart';
@@ -166,7 +165,9 @@ class _HistoriesScreenState extends State<HistoriesScreen>
             ),
           );
         }
-        return Container();
+        return const Center(
+          child: Text('Belum ada data tersedia'),
+        );
       },
     );
   }
@@ -222,7 +223,9 @@ class _HistoriesScreenState extends State<HistoriesScreen>
             ),
           );
         }
-        return Container();
+        return const Center(
+          child: Text('Belum ada data tersedia'),
+        );
       },
     );
   }
