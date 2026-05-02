@@ -1090,6 +1090,9 @@ class _DashboardScreenState extends State<DashboardScreenContent>
                 4,
               ),
               child: TextField(
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
                 controller: _price,
                 keyboardType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[
@@ -1138,6 +1141,9 @@ class _DashboardScreenState extends State<DashboardScreenContent>
                 4,
               ),
               child: TextField(
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
                 controller: _note,
                 decoration: const InputDecoration(
                   hintText: 'Masukkan keterangan',
@@ -1660,6 +1666,9 @@ class _DashboardScreenState extends State<DashboardScreenContent>
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: TextField(
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
                           controller: searchController,
                           decoration: const InputDecoration(
                               hintText: "Cari nama atau ID...",

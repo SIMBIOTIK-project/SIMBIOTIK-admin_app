@@ -108,6 +108,9 @@ class _CustomerScreenState extends State<CustomerScreen> {
                       4,
                     ),
                     child: TextField(
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
                       controller: _keyword,
                       decoration: const InputDecoration(
                         prefixIcon: Icon(Icons.search),
