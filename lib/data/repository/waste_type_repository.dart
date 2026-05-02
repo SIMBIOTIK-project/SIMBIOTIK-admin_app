@@ -32,20 +32,23 @@ class WasteTypeRepository {
     String token,
     int? page,
   ) async {
-    final response = await _dio.get(api,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
-        queryParameters: {
-          'page': page,
-        });
+    try {
+      final response = await _dio.get(api,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $token',
+            },
+          ),
+          queryParameters: {
+            'page': page,
+          });
 
-    if (response.statusCode == 200) {
-      return WasteTypeResponseModel.fromJson(response.data['data']);
-    } else {
+      if (response.statusCode == 200) {
+        return WasteTypeResponseModel.fromJson(response.data['data']);
+      }
       throw Exception('Gagal memuat data');
+    } on DioException catch (e) {
+      throw Exception('Gagal memuat data: ${e.message}');
     }
   }
 

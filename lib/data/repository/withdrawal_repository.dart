@@ -33,20 +33,23 @@ class WithdrawalRepository {
     WithdrawalsRequestModel request,
     String token,
   ) async {
-    final response = await _dio.post(
-      api,
-      data: request.toJson(),
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
-      ),
-    );
+    try {
+      final response = await _dio.post(
+        api,
+        data: request.toJson(),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
 
-    if (response.statusCode == 201) {
-      return WithdrawalsRequestModel.fromJson(response.data);
-    } else {
-      throw Exception('Gagal memuat data');
+      if (response.statusCode == 201) {
+        return WithdrawalsRequestModel.fromJson(response.data);
+      }
+      throw Exception('Gagal menambahkan data');
+    } on DioException catch (e) {
+      throw Exception('Gagal menambahkan data: ${e.message}');
     }
   }
 
@@ -55,23 +58,26 @@ class WithdrawalRepository {
     String? idUser,
     int? page,
   ) async {
-    final response = await _dio.get(
-      api,
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $token',
+    try {
+      final response = await _dio.get(
+        api,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+        queryParameters: {
+          'id_user': idUser,
+          'page': page,
         },
-      ),
-      queryParameters: {
-        'id_user': idUser,
-        'page': page,
-      },
-    );
+      );
 
-    if (response.statusCode == 200) {
-      return WithdrawalResponseModel.fromJson(response.data['data']);
-    } else {
+      if (response.statusCode == 200) {
+        return WithdrawalResponseModel.fromJson(response.data['data']);
+      }
       throw Exception('Gagal memuat data');
+    } on DioException catch (e) {
+      throw Exception('Gagal memuat data: ${e.message}');
     }
   }
 

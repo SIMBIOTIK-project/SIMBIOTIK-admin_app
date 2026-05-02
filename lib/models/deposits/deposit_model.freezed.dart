@@ -27,9 +27,9 @@ mixin _$DepositModel {
   @JsonKey(name: 'id_wastetype')
   String? get idWastetype => throw _privateConstructorUsedError;
   @JsonKey(name: 'weight')
-  String? get weight => throw _privateConstructorUsedError;
+  double? get weight => throw _privateConstructorUsedError;
   @JsonKey(name: 'price')
-  String? get price => throw _privateConstructorUsedError;
+  double? get price => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
   DateTime? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
@@ -61,8 +61,8 @@ abstract class $DepositModelCopyWith<$Res> {
       {@JsonKey(name: 'id') int? id,
       @JsonKey(name: 'id_user') String? idUser,
       @JsonKey(name: 'id_wastetype') String? idWastetype,
-      @JsonKey(name: 'weight') String? weight,
-      @JsonKey(name: 'price') String? price,
+      @JsonKey(name: 'weight') double? weight,
+      @JsonKey(name: 'price') double? price,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
       @JsonKey(name: 'user') UserModel? user,
@@ -115,11 +115,11 @@ class _$DepositModelCopyWithImpl<$Res, $Val extends DepositModel>
       weight: freezed == weight
           ? _value.weight
           : weight // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as double?,
       price: freezed == price
           ? _value.price
           : price // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as double?,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -184,8 +184,8 @@ abstract class _$$DepositModelImplCopyWith<$Res>
       {@JsonKey(name: 'id') int? id,
       @JsonKey(name: 'id_user') String? idUser,
       @JsonKey(name: 'id_wastetype') String? idWastetype,
-      @JsonKey(name: 'weight') String? weight,
-      @JsonKey(name: 'price') String? price,
+      @JsonKey(name: 'weight') double? weight,
+      @JsonKey(name: 'price') double? price,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
       @JsonKey(name: 'user') UserModel? user,
@@ -238,11 +238,11 @@ class __$$DepositModelImplCopyWithImpl<$Res>
       weight: freezed == weight
           ? _value.weight
           : weight // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as double?,
       price: freezed == price
           ? _value.price
           : price // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as double?,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -296,10 +296,10 @@ class _$DepositModelImpl implements _DepositModel {
   final String? idWastetype;
   @override
   @JsonKey(name: 'weight')
-  final String? weight;
+  final double? weight;
   @override
   @JsonKey(name: 'price')
-  final String? price;
+  final double? price;
   @override
   @JsonKey(name: 'created_at')
   final DateTime? createdAt;
@@ -369,8 +369,8 @@ abstract class _DepositModel implements DepositModel {
           {@JsonKey(name: 'id') final int? id,
           @JsonKey(name: 'id_user') final String? idUser,
           @JsonKey(name: 'id_wastetype') final String? idWastetype,
-          @JsonKey(name: 'weight') final String? weight,
-          @JsonKey(name: 'price') final String? price,
+          @JsonKey(name: 'weight') final double? weight,
+          @JsonKey(name: 'price') final double? price,
           @JsonKey(name: 'created_at') final DateTime? createdAt,
           @JsonKey(name: 'updated_at') final DateTime? updatedAt,
           @JsonKey(name: 'user') final UserModel? user,
@@ -392,10 +392,10 @@ abstract class _DepositModel implements DepositModel {
   String? get idWastetype;
   @override
   @JsonKey(name: 'weight')
-  String? get weight;
+  double? get weight;
   @override
   @JsonKey(name: 'price')
-  String? get price;
+  double? get price;
   @override
   @JsonKey(name: 'created_at')
   DateTime? get createdAt;

@@ -17,7 +17,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:gap/gap.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -25,14 +25,16 @@ import 'package:logger/web.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simbiotik_admin/core/blocs/deposit/deposit.dart';
+import 'package:simbiotik_admin/core/blocs/user/user_bloc.dart';
 import 'package:simbiotik_admin/core/blocs/waste_type/waste_type_bloc.dart';
 import 'package:simbiotik_admin/core/blocs/withdrawal/withdrawal.dart';
 import 'package:simbiotik_admin/core/blocs/withdrawal/withdrawal_bloc.dart';
+import 'package:simbiotik_admin/data/repository/repository.dart';
 import 'package:simbiotik_admin/gen/assets.gen.dart';
 import 'package:simbiotik_admin/models/models.dart';
 import 'package:simbiotik_admin/utils/utils.dart';
 
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends StatelessWidget {
   final String token;
   const DashboardScreen({
     required this.token,
@@ -40,10 +42,32 @@ class DashboardScreen extends StatefulWidget {
   });
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => UserBloc(UserRepository()),
+          )
+        ],
+        child: DashboardScreenContent(token: token),
+      ),
+    );
+  }
 }
 
-class _DashboardScreenState extends State<DashboardScreen>
+class DashboardScreenContent extends StatefulWidget {
+  final String token;
+  const DashboardScreenContent({
+    required this.token,
+    super.key,
+  });
+
+  @override
+  State<DashboardScreenContent> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreenContent>
     with SingleTickerProviderStateMixin {
   bool isSwitchedMode = false;
   late TextEditingController _idNasabah;
@@ -75,12 +99,22 @@ class _DashboardScreenState extends State<DashboardScreen>
   int? selectedIndexDeposit;
   int? selectedIndexWithdrawal;
 
+  UserModel? selectedUser;
+
   // Bluetooth setup
-  BluetoothDevice? _selectedDevice;
-  BluetoothConnection? _connection;
+  // BluetoothDevice? _selectedDevice;
+  // BluetoothConnection? _connection;
+  // bool isConnected = false;
+  // late String receivedData;
+  // List<BluetoothDevice> _devices = [];
+
+  // For BLE
+  BluetoothDevice? _device;
+  BluetoothCharacteristic? _characteristic;
+
+  List<ScanResult> _scanResults = [];
+  bool isScanning = false;
   bool isConnected = false;
-  late String receivedData;
-  List<BluetoothDevice> _devices = [];
 
   @override
   void initState() {
@@ -94,6 +128,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     _checkPermissions();
     _loadListDeposit();
     _loadListWithdrawal();
+    _fetchUserData();
   }
 
   /// Check permission bluetooh and location
@@ -111,55 +146,67 @@ class _DashboardScreenState extends State<DashboardScreen>
     }
 
     if (await Permission.bluetoothConnect.isGranted) {
-      _discoverDevices();
+      _scanDevices();
     }
   }
 
-  /// Check discover devices
-  Future<void> _discoverDevices() async {
-    List<BluetoothDevice> devices =
-        await FlutterBluetoothSerial.instance.getBondedDevices();
+  Future<void> _scanDevices() async {
+    _scanResults.clear();
 
-    setState(() {
-      _devices = devices;
+    FlutterBluePlus.startScan(timeout: const Duration(seconds: 4));
+
+    FlutterBluePlus.scanResults.listen((results) {
+      setState(() {
+        _scanResults = results;
+      });
+    });
+
+    FlutterBluePlus.isScanning.listen((scanning) {
+      setState(() {
+        isScanning = scanning;
+      });
     });
   }
 
-  /// Connect to bluetooth device
   Future<void> _connectToDevice(BluetoothDevice device) async {
     try {
-      BluetoothConnection connection =
-          await BluetoothConnection.toAddress(device.address);
-      setState(() {
-        _connection = connection;
-        isConnected = true;
-        _selectedDevice = device;
-      });
+      await device.connect();
+      _device = device;
+      isConnected = true;
 
-      _connection!.input!.listen((data) {
-        setState(() {
-          receivedData = String.fromCharCodes(data).trim();
-          if (receivedData.isNotEmpty) {
-            _weight.text = receivedData;
+      List<BluetoothService> services = await device.discoverServices();
+
+      for (var service in services) {
+        for (var characteristic in service.characteristics) {
+          if (characteristic.properties.notify) {
+            _characteristic = characteristic;
+
+            await characteristic.setNotifyValue(true);
+
+            characteristic.value.listen((value) {
+              String data = String.fromCharCodes(value).trim();
+
+              if (data.isNotEmpty) {
+                setState(() {
+                  _weight.text = data;
+                });
+              }
+            });
           }
-        });
-      });
+        }
+      }
     } catch (e) {
-      Logger().e(e.toString());
+      throw Exception('Gagal terhubung ke perangkat: $e');
     }
   }
 
-  /// Disconnect bluetooth device
   Future<void> _disconnectFromDevice() async {
-    if (_connection != null) {
-      await _connection!.close();
+    if (_device != null) {
+      await _device!.disconnect();
       setState(() {
-        _connection = null;
+        _device = null;
         isConnected = false;
-        _selectedDevice = null;
-        receivedData = '';
       });
-      Logger().i('Disconnected');
     }
   }
 
@@ -266,18 +313,20 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ),
                     const Gap(8.0),
                     FlutterSwitch(
-                      width: 50,
-                      height: 25,
-                      value: isSwitchedMode,
-                      onToggle: (value) {
-                        setState(() {
-                          isSwitchedMode = value;
-                          isConnected
-                              ? _disconnectFromDevice()
-                              : _discoverDevices();
-                        });
-                      },
-                    )
+                        width: 50,
+                        height: 25,
+                        value: isSwitchedMode,
+                        onToggle: (value) {
+                          setState(() {
+                            isSwitchedMode = value;
+                          });
+
+                          if (value) {
+                            _scanDevices();
+                          } else {
+                            _disconnectFromDevice();
+                          }
+                        })
                   ],
                 ),
               ],
@@ -295,13 +344,15 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
                 child: DropdownButton<BluetoothDevice>(
                   underline: const SizedBox.shrink(),
-                  value: _selectedDevice,
+                  value: _device,
                   hint: const Text('Pilih Perangkat Bluetooth'),
                   isExpanded: true,
-                  items: _devices.map((BluetoothDevice device) {
-                    return DropdownMenuItem<BluetoothDevice>(
-                      value: device,
-                      child: Text(device.name ?? 'Unknown'),
+                  items: _scanResults.map((r) {
+                    return DropdownMenuItem(
+                      value: r.device,
+                      child: Text(r.device.name.isNotEmpty
+                          ? r.device.name
+                          : r.device.id.toString()),
                     );
                   }).toList(),
                   onChanged: (BluetoothDevice? newValue) {
@@ -407,32 +458,32 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
             ),
             const Gap(8.0),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.black12,
+            GestureDetector(
+              onTap: () async {
+                final result = await _showUserSearchDialog(context);
+                if (result != null) {
+                  setState(() {
+                    selectedUser = result;
+                    _idNasabah.text = result.idUser!;
+                  });
+                }
+              },
+              child: Container(
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black12),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                borderRadius: BorderRadius.circular(
-                  8.0,
-                ),
-              ),
-              height: 40,
-              padding: const EdgeInsets.fromLTRB(
-                8,
-                4,
-                8,
-                4,
-              ),
-              child: TextField(
-                controller: _idNasabah,
-                decoration: const InputDecoration(
-                  hintText: 'Masukkan ID nasabah',
-                  hintStyle: TextStyle(
-                    fontWeight: FontWeight.w300,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 8.0,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  selectedUser == null
+                      ? "Pilih nasabah"
+                      : "${selectedUser!.name} (${selectedUser!.idUser})",
+                  style: TextStyle(
+                    fontWeight: selectedUser == null
+                        ? FontWeight.w300
+                        : FontWeight.w500,
                   ),
                 ),
               ),
@@ -462,6 +513,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                 4,
               ),
               child: TextField(
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
                 controller: _weight,
                 keyboardType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[
@@ -981,32 +1035,32 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
             ),
             const Gap(8.0),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.black12,
+            GestureDetector(
+              onTap: () async {
+                final result = await _showUserSearchDialog(context);
+                if (result != null) {
+                  setState(() {
+                    selectedUser = result;
+                    _idNasabahWithdrawal.text = result.idUser!;
+                  });
+                }
+              },
+              child: Container(
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black12),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                borderRadius: BorderRadius.circular(
-                  8.0,
-                ),
-              ),
-              height: 40,
-              padding: const EdgeInsets.fromLTRB(
-                8,
-                4,
-                8,
-                4,
-              ),
-              child: TextField(
-                controller: _idNasabahWithdrawal,
-                decoration: const InputDecoration(
-                  hintText: 'Masukkan ID nasabah',
-                  hintStyle: TextStyle(
-                    fontWeight: FontWeight.w300,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 8.0,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  selectedUser == null
+                      ? "Pilih nasabah"
+                      : "${selectedUser!.name} (${selectedUser!.idUser})",
+                  style: TextStyle(
+                    fontWeight: selectedUser == null
+                        ? FontWeight.w300
+                        : FontWeight.w500,
                   ),
                 ),
               ),
@@ -1568,5 +1622,84 @@ class _DashboardScreenState extends State<DashboardScreen>
   _buildNotConnected() {
     ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tidak ada koneksi internet!')));
+  }
+
+  void _fetchUserData() {
+    context.read<UserBloc>().add(UserEvent.fetch(token: widget.token));
+  }
+
+  Future<UserModel?> _showUserSearchDialog(BuildContext context) async {
+    final state = context.read<UserBloc>().state;
+    final users = (state.data?.result?.data ?? [])
+        .where((u) => u.status == 'nasabah')
+        .toList();
+
+    List<UserModel> filtered = List.from(users);
+    TextEditingController searchController = TextEditingController();
+
+    return showDialog<UserModel>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Pilih Nasabah"),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: Column(
+                  children: [
+                    Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.black12,
+                        ),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextField(
+                          controller: searchController,
+                          decoration: const InputDecoration(
+                              hintText: "Cari nama atau ID...",
+                              border: InputBorder.none),
+                          onChanged: (value) {
+                            setState(() {
+                              filtered = users.where((u) {
+                                final name = u.name?.toLowerCase() ?? '';
+                                final id = u.idUser?.toLowerCase() ?? '';
+                                return name.contains(value.toLowerCase()) ||
+                                    id.contains(value.toLowerCase());
+                              }).toList();
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: filtered.length,
+                        itemBuilder: (context, index) {
+                          final user = filtered[index];
+                          return ListTile(
+                            title: Text(user.name ?? '-'),
+                            subtitle: Text(user.idUser ?? '-'),
+                            onTap: () {
+                              Navigator.pop(context, user);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }

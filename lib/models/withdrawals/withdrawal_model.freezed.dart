@@ -25,7 +25,7 @@ mixin _$WithdrawalModel {
   @JsonKey(name: 'id_user')
   String? get idUser => throw _privateConstructorUsedError;
   @JsonKey(name: 'price')
-  String? get price => throw _privateConstructorUsedError;
+  double? get price => throw _privateConstructorUsedError;
   @JsonKey(name: 'status')
   String? get status => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
@@ -56,7 +56,7 @@ abstract class $WithdrawalModelCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: 'id') int? id,
       @JsonKey(name: 'id_user') String? idUser,
-      @JsonKey(name: 'price') String? price,
+      @JsonKey(name: 'price') double? price,
       @JsonKey(name: 'status') String? status,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
@@ -102,7 +102,7 @@ class _$WithdrawalModelCopyWithImpl<$Res, $Val extends WithdrawalModel>
       price: freezed == price
           ? _value.price
           : price // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as double?,
       status: freezed == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -152,7 +152,7 @@ abstract class _$$WithdrawalModelImplCopyWith<$Res>
   $Res call(
       {@JsonKey(name: 'id') int? id,
       @JsonKey(name: 'id_user') String? idUser,
-      @JsonKey(name: 'price') String? price,
+      @JsonKey(name: 'price') double? price,
       @JsonKey(name: 'status') String? status,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
@@ -197,7 +197,7 @@ class __$$WithdrawalModelImplCopyWithImpl<$Res>
       price: freezed == price
           ? _value.price
           : price // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as double?,
       status: freezed == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -246,7 +246,7 @@ class _$WithdrawalModelImpl implements _WithdrawalModel {
   final String? idUser;
   @override
   @JsonKey(name: 'price')
-  final String? price;
+  final double? price;
   @override
   @JsonKey(name: 'status')
   final String? status;
@@ -312,7 +312,7 @@ abstract class _WithdrawalModel implements WithdrawalModel {
   const factory _WithdrawalModel(
           {@JsonKey(name: 'id') final int? id,
           @JsonKey(name: 'id_user') final String? idUser,
-          @JsonKey(name: 'price') final String? price,
+          @JsonKey(name: 'price') final double? price,
           @JsonKey(name: 'status') final String? status,
           @JsonKey(name: 'created_at') final DateTime? createdAt,
           @JsonKey(name: 'updated_at') final DateTime? updatedAt,
@@ -331,7 +331,7 @@ abstract class _WithdrawalModel implements WithdrawalModel {
   String? get idUser;
   @override
   @JsonKey(name: 'price')
-  String? get price;
+  double? get price;
   @override
   @JsonKey(name: 'status')
   String? get status;
